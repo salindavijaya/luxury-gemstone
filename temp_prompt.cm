@@ -1,0 +1,155 @@
+```
+Technology Stack:
+- Vue.js 3 with Composition API
+- Vite build tool
+- Tailwind CSS for styling
+- Pinia for state management
+- Vue Router 4
+- TypeScript
+
+Design System:
+- Color Palette: Primary: emerald-600, Secondary: slate-800, Accent: amber-500
+- Typography: Inter font family
+- Spacing: Tailwind's default spacing scale
+- Border Radius: rounded-lg (8px) for cards, rounded-md (6px) for buttons
+- Shadows: shadow-lg for cards, shadow-md for hover states
+
+Component Naming Convention:
+- PascalCase for components (ProductCard.vue)
+- Prefix with base type: Base*, Layout*, Product*, User*
+- Composables: use* prefix (useAuth, useCart)
+
+Responsive Breakpoints:
+- Mobile: default (0px+)
+- Tablet: md (768px+)
+- Desktop: lg (1024px+)
+- Large Desktop: xl (1280px+)
+
+Create performance optimizations, PWA features, and production-ready enhancements for the luxury gemstone e-commerce platform:
+
+CONTEXT (Consistent Architecture):
+- Vue 3 Composition API with <script setup>
+- Tailwind CSS (emerald-600 primary, slate-800 secondary, amber-500 accent)
+- Pinia stores, mobile-first responsive design
+- All previous components and stores established
+
+GENERATE COMPLETE CODE FOR:
+
+1. **Performance Optimizations:**
+   - LazyImage.vue (progressive image loading with placeholders)
+   - VirtualScroller.vue (virtual scrolling for large product lists)
+   - InfiniteScroll.vue (infinite scroll implementation)
+   - ImageOptimizer.ts (image compression and format detection)
+
+2. **PWA Implementation:**
+   - SW (Service Worker) registration and caching strategies
+   - manifest.json for PWA installation
+   - OfflineIndicator.vue (offline status notification)
+   - InstallPrompt.vue (PWA installation prompt)
+
+3. **SEO & Meta Management:**
+   - composables/useSEO.ts (dynamic meta tag management)
+   - SitemapGenerator.ts (sitemap generation utilities)
+   - StructuredData.vue (JSON-LD for products)
+   - OpenGraph.vue (social sharing optimization)
+
+4. **Error Handling & Monitoring:**
+   - ErrorBoundary.vue (global error handling)
+   - ErrorPage.vue (custom error pages)
+   - Logger.ts (client-side error logging)
+   - PerformanceMonitor.ts (performance tracking)
+
+5. **Advanced Features:**
+   - SearchSuggestions.vue (AI-powered search suggestions)
+   - ColorExtractor.ts (dominant color extraction from images)
+   - ImageComparison.vue (before/after image slider)
+   - CurrencyConverter.vue (multi-currency support)
+
+6. **Build Optimizations:**
+   - vite.config.js (production optimizations)
+   - Bundle analyzer configuration
+   - Code splitting strategies
+   - Asset optimization settings
+
+PERFORMANCE FEATURES:
+- Image lazy loading with intersection observer
+- Virtual scrolling for large catalogs
+- Code splitting by routes and features
+- Preloading critical resources
+- Caching strategies for API responses
+- Debounced search and filtering
+- Optimized bundle sizes
+
+PWA CAPABILITIES:
+- Offline browsing with cached data
+- Add to home screen functionality
+- Push notifications for order updates
+- Background sync for cart persistence
+- Install prompts with user engagement tracking
+- Offline fallback pages
+
+SEO OPTIMIZATIONS:
+- Dynamic meta tags for all pages
+- Open Graph tags for social sharing
+- Structured data for product pages
+- XML sitemap generation
+- Canonical URLs management
+- Page speed optimizations
+
+ACCESSIBILITY ENHANCEMENTS:
+- Screen reader optimization
+- Keyboard navigation improvements
+- High contrast mode support
+- Focus management
+- ARIA live regions for dynamic content
+
+ADVANCED UX FEATURES:
+- Smart search with typo tolerance
+- Visual search preparation
+- Color-based product filtering
+- Multi-language preparation
+- Currency conversion
+- Personalized recommendations engine
+
+MONITORING & ANALYTICS:
+- Performance metrics collection
+- Error boundary with reporting
+- User interaction tracking
+- Core Web Vitals monitoring
+- Conversion funnel analysis preparation
+
+SECURITY ENHANCEMENTS:
+- Content Security Policy headers
+- XSS protection utilities
+- CSRF token management
+- Secure cookie handling
+- Input sanitization
+
+DEPLOYMENT PREPARATION:
+- Environment configuration
+- Build optimization for different environments
+- Asset CDN preparation
+- Docker configuration
+- CI/CD pipeline preparation
+
+Generate complete, production-ready code with comprehensive performance monitoring, PWA capabilities, and deployment-ready optimizations.
+
+
+IMPORTANT REQUIREMENTS:
+- Generate COMPLETE, production-ready code (no placeholders or TODOs)
+- All components must be fully responsive and mobile-optimized
+- Include comprehensive error handling and loading states
+- Add detailed comments explaining complex logic
+- Ensure all code follows Vue 3 Composition API best practices
+- Make components reusable and properly typed
+- Include accessibility features (ARIA labels, keyboard navigation)
+- Generate mock data where needed for realistic demonstrations
+
+DELIVERABLES:
+Please provide complete file contents for each requested component, including:
+- Full component code with <template>, <script setup>, and <style scoped>
+- All necessary imports and dependencies
+- Proper TypeScript types (if applicable)
+- Responsive design classes
+- Error handling and loading states
+- Accessibility attributes

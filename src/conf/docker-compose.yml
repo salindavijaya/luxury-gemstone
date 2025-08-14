@@ -1,0 +1,291 @@
+version: '3.8'
+
+services:
+  # Frontend application
+  gemstore-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "80:8080"
+    environment:
+      - NODE_ENV=production
+      - API_BASE_URL=http://gemstore-api:8000
+    depends_on:
+      - gemstore-api
+    restart: unless-stopped
+    networks:
+      - gemstore-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`gemstore.local`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+
+  # API backend (placeholder for actual backend)
+  gemstore-api:
+    image: node:18-alpine
+    command: sh -c "npm install -g json-server && json-server --watch /data/db.json --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./mock-api/db.json:/data/db.json:ro
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - gemstore-network
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - gemstore-network
+
+  # Nginx reverse proxy
+  nginx-proxy:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/ssl.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - gemstore-frontend
+    restart: unless-stopped
+    networks:
+      - gemstore-network
+
+networks:
+  gemstore-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+
+---
+# Development environment
+version: '3.8'
+
+services:
+  # Development frontend
+  gemstore-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_HOT_RELOAD=true
+    command: npm run dev -- --host 0.0.0.0
+    networks:
+      - gemstore-dev-network
+
+  # Mock API for development
+  mock-api:
+    image: node:18-alpine
+    command: sh -c "npm install -g json-server && json-server --watch /data/db.json --host 0.0.0.0 --port 8000 --delay 300"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./mock-api:/data
+    environment:
+      - NODE_ENV=development
+    networks:
+      - gemstore-dev-network
+
+  # Database for development
+  postgres-dev:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: gemstore_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    networks:
+      - gemstore-dev-network
+
+  # Redis for development
+  redis-dev:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    networks:
+      - gemstore-dev-network
+
+networks:
+  gemstore-dev-network:
+    driver: bridge
+
+volumes:
+  postgres-dev-data:
+
+---
+# Testing environment
+version: '3.8'
+
+services:
+  # Test runner
+  gemstore-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    command: npm run test:ci
+    networks:
+      - gemstore-test-network
+
+  # Test database
+  postgres-test:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: gemstore_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - gemstore-test-network
+
+  # Selenium for E2E tests
+  selenium:
+    image: selenium/standalone-chrome:latest
+    ports:
+      - "4444:4444"
+    environment:
+      - SE_NODE_MAX_SESSIONS=2
+    networks:
+      - gemstore-test-network
+
+networks:
+  gemstore-test-network:
+    driver: bridge
+
+---
+# Production with monitoring
+version: '3.8'
+
+services:
+  # Frontend
+  gemstore-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    environment:
+      - NODE_ENV=production
+    networks:
+      - gemstore-network
+      - monitoring-network
+
+  # Load balancer
+  traefik:
+    image: traefik:v2.9
+    command:
+      - "--api.dashboard=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.docker=true"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@gemstore.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt:/letsencrypt"
+    networks:
+      - gemstore-network
+      - monitoring-network
+
+  # Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - monitoring-network
+
+  # Log aggregation
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/tmp/loki
+    networks:
+      - monitoring-network
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - /var/log:/var/log:ro
+      - ./monitoring/promtail.yml:/etc/promtail/config.yml:ro
+    networks:
+      - monitoring-network
+
+networks:
+  gemstore-network:
+    driver: bridge
+  monitoring-network:
+    driver: bridge
+
+volumes:
+  letsencrypt:
+  prometheus-data:
+  grafana-data:
+  loki-data:

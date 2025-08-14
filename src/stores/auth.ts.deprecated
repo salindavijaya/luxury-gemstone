@@ -1,0 +1,456 @@
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useUIStore } from "./ui";
+
+// Types
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+  phone?: string;
+  dateOfBirth?: string;
+  preferences: {
+    currency: string;
+    language: string;
+    newsletter: boolean;
+    notifications: boolean;
+  };
+  addresses: Address[];
+  membershipTier: "bronze" | "silver" | "gold" | "platinum";
+  joinDate: string;
+  lastLogin?: string;
+}
+
+export interface Address {
+  id: string;
+  type: "billing" | "shipping";
+  firstName: string;
+  lastName: string;
+  street: string;
+  street2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  isDefault: boolean;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface RegisterCredentials {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  agreeToTerms: boolean;
+  subscribeNewsletter?: boolean;
+}
+
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  refreshToken: string | null;
+  isLoading: boolean;
+  loginAttempts: number;
+  lastLoginAttempt: number | null;
+}
+
+export const useAuthStore = defineStore("auth", () => {
+  const router = useRouter();
+  const uiStore = useUIStore();
+
+  // State
+  const user = ref<User | null>(null);
+  const token = ref<string | null>(null);
+  const refreshToken = ref<string | null>(null);
+  const isLoading = ref(false);
+  const loginAttempts = ref(0);
+  const lastLoginAttempt = ref<number | null>(null);
+
+  // Computed
+  const isAuthenticated = computed(() => !!token.value && !!user.value);
+  const userFullName = computed(() =>
+    user.value ? `${user.value.firstName} ${user.value.lastName}` : ""
+  );
+  const userInitials = computed(() =>
+    user.value ? `${user.value.firstName[0]}${user.value.lastName[0]}` : ""
+  );
+  const canAttemptLogin = computed(() => {
+    if (loginAttempts.value < 3) return true;
+    if (!lastLoginAttempt.value) return true;
+
+    const timeSinceLastAttempt = Date.now() - lastLoginAttempt.value;
+    const lockoutDuration = 15 * 60 * 1000; // 15 minutes
+    return timeSinceLastAttempt > lockoutDuration;
+  });
+
+  // Actions
+  const login = async (credentials: LoginCredentials): Promise<boolean> => {
+    if (!canAttemptLogin.value) {
+      uiStore.showNotification({
+        type: "error",
+        title: "Account Locked",
+        message: "Too many failed attempts. Please try again in 15 minutes.",
+      });
+      return false;
+    }
+
+    isLoading.value = true;
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Mock successful login
+      if (
+        credentials.email === "demo@luxury-gems.com" &&
+        credentials.password === "demo123"
+      ) {
+        const mockUser: User = {
+          id: "1",
+          email: credentials.email,
+          firstName: "Alexandra",
+          lastName: "Sterling",
+          avatar:
+            "https://images.unsplash.com/photo-1494790108755-2616b612b372?w=150&h=150&fit=crop&crop=face",
+          phone: "+1 (555) 123-4567",
+          preferences: {
+            currency: "USD",
+            language: "en",
+            newsletter: true,
+            notifications: true,
+          },
+          addresses: [
+            {
+              id: "1",
+              type: "billing",
+              firstName: "Alexandra",
+              lastName: "Sterling",
+              street: "123 Fifth Avenue",
+              street2: "Suite 4500",
+              city: "New York",
+              state: "NY",
+              zipCode: "10016",
+              country: "US",
+              isDefault: true,
+            },
+          ],
+          membershipTier: "gold",
+          joinDate: "2023-01-15",
+          lastLogin: new Date().toISOString(),
+        };
+
+        const mockToken = "mock-jwt-token-" + Date.now();
+        const mockRefreshToken = "mock-refresh-token-" + Date.now();
+
+        // Set auth data
+        user.value = mockUser;
+        token.value = mockToken;
+        refreshToken.value = mockRefreshToken;
+
+        // Store in localStorage if remember me is checked
+        if (credentials.rememberMe) {
+          localStorage.setItem("auth_token", mockToken);
+          localStorage.setItem("auth_refresh_token", mockRefreshToken);
+          localStorage.setItem("auth_user", JSON.stringify(mockUser));
+        } else {
+          sessionStorage.setItem("auth_token", mockToken);
+          sessionStorage.setItem("auth_user", JSON.stringify(mockUser));
+        }
+
+        // Reset login attempts
+        loginAttempts.value = 0;
+        lastLoginAttempt.value = null;
+
+        uiStore.showNotification({
+          type: "success",
+          title: "Welcome Back!",
+          message: `Good to see you again, ${mockUser.firstName}!`,
+        });
+
+        return true;
+      } else {
+        // Mock failed login
+        loginAttempts.value++;
+        lastLoginAttempt.value = Date.now();
+
+        throw new Error("Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+
+      uiStore.showNotification({
+        type: "error",
+        title: "Login Failed",
+        message: "Invalid email or password. Please try again.",
+      });
+
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const register = async (
+    credentials: RegisterCredentials
+  ): Promise<boolean> => {
+    if (credentials.password !== credentials.confirmPassword) {
+      uiStore.showNotification({
+        type: "error",
+        title: "Registration Failed",
+        message: "Passwords do not match.",
+      });
+      return false;
+    }
+
+    isLoading.value = true;
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Mock successful registration
+      const mockUser: User = {
+        id: String(Date.now()),
+        email: credentials.email,
+        firstName: credentials.firstName,
+        lastName: credentials.lastName,
+        preferences: {
+          currency: "USD",
+          language: "en",
+          newsletter: credentials.subscribeNewsletter || false,
+          notifications: true,
+        },
+        addresses: [],
+        membershipTier: "bronze",
+        joinDate: new Date().toISOString(),
+      };
+
+      const mockToken = "mock-jwt-token-" + Date.now();
+      const mockRefreshToken = "mock-refresh-token-" + Date.now();
+
+      // Set auth data
+      user.value = mockUser;
+      token.value = mockToken;
+      refreshToken.value = mockRefreshToken;
+
+      // Store in session storage
+      sessionStorage.setItem("auth_token", mockToken);
+      sessionStorage.setItem("auth_user", JSON.stringify(mockUser));
+
+      uiStore.showNotification({
+        type: "success",
+        title: "Welcome!",
+        message: `Account created successfully. Welcome to our luxury community, ${mockUser.firstName}!`,
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Registration error:", error);
+
+      uiStore.showNotification({
+        type: "error",
+        title: "Registration Failed",
+        message: "Failed to create account. Please try again.",
+      });
+
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    isLoading.value = true;
+
+    try {
+      // Clear auth data
+      user.value = null;
+      token.value = null;
+      refreshToken.value = null;
+
+      // Clear storage
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_refresh_token");
+      localStorage.removeItem("auth_user");
+      sessionStorage.removeItem("auth_token");
+      sessionStorage.removeItem("auth_user");
+
+      // Reset login attempts
+      loginAttempts.value = 0;
+      lastLoginAttempt.value = null;
+
+      uiStore.showNotification({
+        type: "info",
+        title: "Logged Out",
+        message: "You have been successfully logged out.",
+      });
+
+      // Redirect to home
+      router.push({ name: "home" });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const updateProfile = async (
+    profileData: Partial<User>
+  ): Promise<boolean> => {
+    if (!user.value) return false;
+
+    isLoading.value = true;
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Update user data
+      user.value = { ...user.value, ...profileData };
+
+      // Update storage
+      const storage = localStorage.getItem("auth_user")
+        ? localStorage
+        : sessionStorage;
+      storage.setItem("auth_user", JSON.stringify(user.value));
+
+      uiStore.showNotification({
+        type: "success",
+        title: "Profile Updated",
+        message: "Your profile has been updated successfully.",
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Profile update error:", error);
+
+      uiStore.showNotification({
+        type: "error",
+        title: "Update Failed",
+        message: "Failed to update profile. Please try again.",
+      });
+
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const changePassword = async (
+    currentPassword: string,
+    newPassword: string
+  ): Promise<boolean> => {
+    isLoading.value = true;
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Mock password change
+      uiStore.showNotification({
+        type: "success",
+        title: "Password Changed",
+        message: "Your password has been updated successfully.",
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Password change error:", error);
+
+      uiStore.showNotification({
+        type: "error",
+        title: "Password Change Failed",
+        message: "Failed to change password. Please try again.",
+      });
+
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const refreshAccessToken = async (): Promise<boolean> => {
+    if (!refreshToken.value) return false;
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const newToken = "mock-jwt-token-" + Date.now();
+      token.value = newToken;
+
+      // Update storage
+      const storage = localStorage.getItem("auth_token")
+        ? localStorage
+        : sessionStorage;
+      storage.setItem("auth_token", newToken);
+
+      return true;
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      await logout();
+      return false;
+    }
+  };
+
+  const initializeAuth = (): void => {
+    // Check for stored auth data
+    const storedToken =
+      localStorage.getItem("auth_token") ||
+      sessionStorage.getItem("auth_token");
+    const storedUser =
+      localStorage.getItem("auth_user") || sessionStorage.getItem("auth_user");
+    const storedRefreshToken = localStorage.getItem("auth_refresh_token");
+
+    if (storedToken && storedUser) {
+      try {
+        token.value = storedToken;
+        user.value = JSON.parse(storedUser);
+        refreshToken.value = storedRefreshToken;
+      } catch (error) {
+        console.error("Failed to parse stored user data:", error);
+        // Clear corrupted data
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
+        localStorage.removeItem("auth_refresh_token");
+        sessionStorage.removeItem("auth_token");
+        sessionStorage.removeItem("auth_user");
+      }
+    }
+  };
+
+  // Initialize auth on store creation
+  initializeAuth();
+
+  return {
+    // State
+    user: readonly(user),
+    token: readonly(token),
+    isLoading: readonly(isLoading),
+    loginAttempts: readonly(loginAttempts),
+
+    // Computed
+    isAuthenticated,
+    userFullName,
+    userInitials,
+    canAttemptLogin,
+
+    // Actions
+    login,
+    register,
+    logout,
+    updateProfile,
+    changePassword,
+    refreshAccessToken,
+    initializeAuth,
+  };
+});
