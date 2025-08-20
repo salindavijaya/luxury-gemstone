@@ -151,11 +151,18 @@ export const useUIStore = defineStore("ui", () => {
     }
   };
 
+  // Reset body overflow when component is mounted
+  const resetBodyOverflow = () => {
+    if (modals.value.length === 0) {
+      document.body.style.removeProperty("overflow");
+    }
+  };
+
   // Modal actions
   const openModal = (modal: Omit<Modal, "id">) => {
     const id = `modal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     modals.value.push({ ...modal, id });
-    document.body.style.overflow = "hidden";
+    document.body.style.setProperty("overflow", "hidden", "important");
     return id;
   };
 
@@ -171,13 +178,13 @@ export const useUIStore = defineStore("ui", () => {
     }
 
     if (modals.value.length === 0) {
-      document.body.style.overflow = "";
+      document.body.style.removeProperty("overflow");
     }
   };
 
   const closeAllModals = () => {
     modals.value = [];
-    document.body.style.overflow = "";
+    document.body.style.removeProperty("overflow");
   };
 
   // Toast actions

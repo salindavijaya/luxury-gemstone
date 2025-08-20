@@ -1,8 +1,13 @@
 <template>
   <div class="home-page">
     <!-- Hero Section with Image Gallery -->
-    <section class="relative h-[600px] mb-12">
-      <HeroCarousel :images="heroImages" :autoplay="true" :interval="5000" />
+    <section class="relative h-[600px] w-full">
+      <HeroCarousel
+        :images="heroImages"
+        :autoplay="true"
+        :interval="5000"
+        class="w-full h-full"
+      />
       <div
         class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"
       >
@@ -21,10 +26,12 @@
       </div>
     </section>
 
-    <main class="container mx-auto px-4">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Featured Products Section -->
       <section class="mb-16">
-        <div class="flex justify-between items-center mb-6">
+        <div
+          class="flex flex-col sm:flex-row justify-between items-center mb-6"
+        >
           <h2 class="text-3xl font-semibold">Featured Gemstones</h2>
           <router-link
             to="/products"
@@ -33,7 +40,9 @@
             View All →
           </router-link>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
+        >
           <ProductCard
             v-for="product in featuredProducts"
             :key="product.id"
@@ -45,7 +54,9 @@
       <!-- Categories Section -->
       <section class="mb-16">
         <h2 class="text-3xl font-semibold mb-6">Browse by Category</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+        >
           <FilterCategory />
           <FilterGemstoneType />
           <FilterClarity />
@@ -90,7 +101,7 @@
     </main>
 
     <!-- Cart Drawer -->
-    <CartDrawer :isOpen="false" />
+    <CartDrawer />
   </div>
 </template>
 
@@ -116,15 +127,15 @@ const featuredProducts = ref([]);
 // Sample images - replace with actual images once available
 const heroImages = ref([
   {
-    url: "/images/hero/diamond-hero.jpg",
+    url: "/src/assets/images/hero/Exquisite_Diamond_Collection_480x480.webp",
     alt: "Exquisite Diamond Collection",
   },
   {
-    url: "/images/hero/ruby-hero.jpg",
+    url: "/src/assets/images/hero/Premium_Sapphire_Collection.webp",
     alt: "Rare Ruby Collection",
   },
   {
-    url: "/images/hero/sapphire-hero.jpg",
+    url: "/src/assets/images/hero/Rare_Ruby_Collection_1024x1024.webp",
     alt: "Premium Sapphire Collection",
   },
 ]);

@@ -1,6 +1,6 @@
 // composables/useProducts.ts
-import { computed } from 'vue';
-import { useProductsStore } from '@/stores/products';
+import { computed } from "vue";
+import { useProductsStore } from "@/stores/products";
 
 export const useProducts = () => {
   const store = useProductsStore();
@@ -15,8 +15,15 @@ export const useProducts = () => {
   const hasActiveFilters = computed(() => store.hasActiveFilters);
   const viewMode = computed(() => store.viewMode);
   const sortBy = computed(() => store.sortBy);
+  const featuredProducts = computed(() => store.featuredProducts);
 
   const fetchProducts = () => store.fetchProducts();
+  const getFeaturedProducts = async () => {
+    if (store.products.length === 0) {
+      await store.fetchProducts();
+    }
+    return store.featuredProducts;
+  };
   const setFilters = (filters: any) => store.setFilters(filters);
   const clearFilters = () => store.clearFilters();
   const setSortBy = (sort: any) => store.setSortBy(sort);
@@ -42,5 +49,7 @@ export const useProducts = () => {
     setViewMode,
     setPage,
     addToRecentlyViewed,
+    getFeaturedProducts,
+    featuredProducts,
   };
 };

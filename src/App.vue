@@ -1,10 +1,13 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <LayoutHeader v-if="!hideNavigation" />
+    <LayoutHeader
+      v-if="!hideNavigation"
+      class="sticky top-0 z-50 bg-white shadow"
+    />
 
     <!-- Main Content -->
-    <main>
+    <main class="flex-grow">
       <RouterView v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
