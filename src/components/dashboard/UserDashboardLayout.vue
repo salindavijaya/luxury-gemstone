@@ -11,14 +11,16 @@
         >
           <MenuIcon class="w-6 h-6" />
         </button>
-        <h1 class="text-lg font-semibold text-slate-900">{{ currentPageTitle }}</h1>
+        <h1 class="text-lg font-semibold text-slate-900">
+          {{ currentPageTitle }}
+        </h1>
         <div class="w-10"></div>
       </div>
     </div>
 
     <div class="lg:flex">
       <!-- Desktop Sidebar -->
-      <DashboardSidebar 
+      <DashboardSidebar
         :is-mobile="false"
         :current-page="currentPage"
         @navigate="handleNavigation"
@@ -34,7 +36,9 @@
         >
           <div class="fixed inset-0 bg-slate-600 bg-opacity-75"></div>
           <div class="fixed inset-y-0 left-0 w-64 bg-white" @click.stop>
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+            <div
+              class="flex items-center justify-between p-4 border-b border-slate-200"
+            >
               <h2 class="text-lg font-semibold text-slate-900">Menu</h2>
               <button
                 @click="sidebarOpen = false"
@@ -43,7 +47,7 @@
                 <XIcon class="w-5 h-5" />
               </button>
             </div>
-            <DashboardSidebar 
+            <DashboardSidebar
               :is-mobile="true"
               :current-page="currentPage"
               @navigate="handleMobileNavigation"
@@ -59,7 +63,9 @@
           <div class="hidden lg:block mb-6">
             <div class="flex items-center justify-between">
               <div>
-                <h1 class="text-2xl font-bold text-slate-900">{{ currentPageTitle }}</h1>
+                <h1 class="text-2xl font-bold text-slate-900">
+                  {{ currentPageTitle }}
+                </h1>
                 <Breadcrumb :items="breadcrumbItems" class="mt-1" />
               </div>
               <div class="flex items-center space-x-4">
@@ -69,7 +75,7 @@
                     :src="user?.avatar || '/default-avatar.jpg'"
                     :alt="user?.firstName"
                     class="w-8 h-8 rounded-full"
-                  >
+                  />
                   <span class="text-sm font-medium text-slate-700">
                     {{ user?.firstName }}
                   </span>
@@ -89,25 +95,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useUserStore } from '@/stores/user';
-import { MenuIcon, XIcon } from 'lucide-vue-next';
-import DashboardSidebar from './DashboardSidebar.vue';
-import NotificationCenter from './NotificationCenter.vue';
-import Breadcrumb from './Breadcrumb.vue';
-import DashboardOverview from './DashboardOverview.vue';
-import DashboardOrderHistory from './DashboardOrderHistory.vue';
-import DashboardWishlist from './DashboardWishlist.vue';
-import DashboardAddresses from './DashboardAddresses.vue';
-import DashboardSettings from './DashboardSettings.vue';
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useUserStore } from "@/stores/user";
+import { MenuIcon, XIcon } from "lucide-vue-next";
+import DashboardSidebar from "./DashboardSidebar.vue";
+import NotificationCenter from "./NotificationCenter.vue";
+import Breadcrumb from "../UI/BreadCrumb.vue";
+import DashboardOverview from "./DashboardOverview.vue";
+import DashboardOrderHistory from "./DashboardOrderHistory.vue";
+import DashboardWishlist from "./DashboardWishlist.vue";
+import DashboardAddresses from "./DashboardAddresses.vue";
+import DashboardSettings from "./DashboardSettings.vue";
 
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 
 const sidebarOpen = ref(false);
-const currentPage = ref('overview');
+const currentPage = ref("overview");
 
 const user = computed(() => userStore.user);
 
@@ -120,18 +126,22 @@ const pageComponents = {
 };
 
 const pageTitles = {
-  overview: 'Dashboard Overview',
-  orders: 'Order History',
-  wishlist: 'My Wishlist',
-  addresses: 'Address Book',
-  settings: 'Account Settings',
+  overview: "Dashboard Overview",
+  orders: "Order History",
+  wishlist: "My Wishlist",
+  addresses: "Address Book",
+  settings: "Account Settings",
 };
 
-const currentComponent = computed(() => pageComponents[currentPage.value] || DashboardOverview);
-const currentPageTitle = computed(() => pageTitles[currentPage.value] || 'Dashboard');
+const currentComponent = computed(
+  () => pageComponents[currentPage.value] || DashboardOverview
+);
+const currentPageTitle = computed(
+  () => pageTitles[currentPage.value] || "Dashboard"
+);
 
 const breadcrumbItems = computed(() => [
-  { label: 'Account', href: '/dashboard' },
+  { label: "Account", href: "/dashboard" },
   { label: currentPageTitle.value, href: route.path, current: true },
 ]);
 

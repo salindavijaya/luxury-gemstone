@@ -6,8 +6,18 @@
         @click="showCreateModal = true"
         class="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition-colors flex items-center space-x-2"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          ></path>
         </svg>
         <span>Save Current Search</span>
       </button>
@@ -29,13 +39,27 @@
 
     <!-- Empty State -->
     <div v-else-if="savedSearches.length === 0" class="text-center py-12">
-      <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      <div
+        class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4"
+      >
+        <svg
+          class="w-8 h-8 text-slate-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          ></path>
         </svg>
       </div>
       <h3 class="text-lg font-medium text-slate-800 mb-2">No Saved Searches</h3>
-      <p class="text-slate-600 mb-4">Save your frequently used searches for quick access later.</p>
+      <p class="text-slate-600 mb-4">
+        Save your frequently used searches for quick access later.
+      </p>
     </div>
 
     <!-- Saved Searches List -->
@@ -48,8 +72,10 @@
         <div class="flex items-start justify-between mb-3">
           <div class="flex-1">
             <h3 class="font-semibold text-slate-800 mb-1">{{ search.name }}</h3>
-            <p class="text-sm text-slate-600 mb-2">{{ search.description || 'No description' }}</p>
-            
+            <p class="text-sm text-slate-600 mb-2">
+              {{ search.description || "No description" }}
+            </p>
+
             <!-- Search Criteria -->
             <div class="flex flex-wrap gap-2 mb-3">
               <span
@@ -66,7 +92,9 @@
             <div class="flex items-center space-x-4 text-xs text-slate-500">
               <span>Created {{ formatDate(search.createdAt) }}</span>
               <span>{{ search.resultCount }} results</span>
-              <span v-if="search.lastUsed">Last used {{ formatDate(search.lastUsed) }}</span>
+              <span v-if="search.lastUsed"
+                >Last used {{ formatDate(search.lastUsed) }}</span
+              >
             </div>
           </div>
 
@@ -77,18 +105,38 @@
               class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
               title="Run Search"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
               </svg>
             </button>
-            
+
             <button
               @click="editSearch(search)"
               class="p-2 text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
               title="Edit Search"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                ></path>
               </svg>
             </button>
 
@@ -97,15 +145,25 @@
                 @click="toggleDropdown(search.id)"
                 class="p-2 text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  ></path>
                 </svg>
               </button>
-              
+
               <!-- Dropdown Menu -->
               <div
                 v-if="activeDropdown === search.id"
-                v-click-outside="() => activeDropdown = null"
+                v-click-outside="() => (activeDropdown = null)"
                 class="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-10"
               >
                 <button
@@ -126,7 +184,7 @@
                 >
                   Share
                 </button>
-                <hr class="border-slate-200">
+                <hr class="border-slate-200" />
                 <button
                   @click="deleteSearch(search.id)"
                   class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-lg"
@@ -139,9 +197,22 @@
         </div>
 
         <!-- Price Alert Badge -->
-        <div v-if="search.hasAlert" class="inline-flex items-center px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-md">
-          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5zm0 0V3"></path>
+        <div
+          v-if="search.hasAlert"
+          class="inline-flex items-center px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-md"
+        >
+          <svg
+            class="w-3 h-3 mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 17h5l-5 5-5-5h5zm0 0V3"
+            ></path>
           </svg>
           Price Alert Active
         </div>
@@ -156,7 +227,9 @@
     >
       <form @submit.prevent="saveSearch" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Search Name</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2"
+            >Search Name</label
+          >
           <input
             v-model="searchForm.name"
             type="text"
@@ -167,7 +240,9 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Description (optional)</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2"
+            >Description (optional)</label
+          >
           <textarea
             v-model="searchForm.description"
             rows="3"
@@ -178,9 +253,14 @@
 
         <!-- Search Criteria Preview -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Search Criteria</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2"
+            >Search Criteria</label
+          >
           <div class="bg-slate-50 rounded-md p-3">
-            <div v-if="Object.keys(searchForm.criteria).length === 0" class="text-sm text-slate-500 italic">
+            <div
+              v-if="Object.keys(searchForm.criteria).length === 0"
+              class="text-sm text-slate-500 italic"
+            >
               No search criteria detected. Please run a search first.
             </div>
             <div v-else class="flex flex-wrap gap-2">
@@ -222,7 +302,7 @@
             :disabled="!searchForm.name.trim()"
             class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {{ showEditModal ? 'Update Search' : 'Save Search' }}
+            {{ showEditModal ? "Update Search" : "Save Search" }}
           </button>
         </div>
       </form>
@@ -235,8 +315,10 @@
       title="Share Saved Search"
     >
       <div class="space-y-4">
-        <p class="text-sm text-slate-600">Share this search with others via link:</p>
-        
+        <p class="text-sm text-slate-600">
+          Share this search with others via link:
+        </p>
+
         <div class="flex items-center space-x-2">
           <input
             v-model="shareUrl"
@@ -248,7 +330,7 @@
             @click="copyToClipboard"
             class="px-3 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors"
           >
-            {{ copied ? 'Copied!' : 'Copy' }}
+            {{ copied ? "Copied!" : "Copy" }}
           </button>
         </div>
 
@@ -257,8 +339,18 @@
             @click="shareViaEmail"
             class="flex items-center space-x-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.2a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 8l7.89 4.2a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              ></path>
             </svg>
             <span>Email</span>
           </button>
@@ -266,8 +358,18 @@
             @click="shareViaSMS"
             class="flex items-center space-x-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              ></path>
             </svg>
             <span>SMS</span>
           </button>
@@ -283,7 +385,9 @@
     >
       <form @submit.prevent="createPriceAlert" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Alert Name</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2"
+            >Alert Name</label
+          >
           <input
             v-model="alertForm.name"
             type="text"
@@ -295,7 +399,9 @@
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Alert Type</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2"
+              >Alert Type</label
+            >
             <select
               v-model="alertForm.type"
               class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
@@ -307,7 +413,9 @@
           </div>
 
           <div v-if="alertForm.type === 'price_drop'">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Threshold (%)</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2"
+              >Threshold (%)</label
+            >
             <input
               v-model.number="alertForm.threshold"
               type="number"
@@ -320,7 +428,9 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Notification Method</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2"
+            >Notification Method</label
+          >
           <div class="space-y-2">
             <label class="flex items-center">
               <input
@@ -328,7 +438,9 @@
                 type="checkbox"
                 class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
               />
-              <span class="ml-2 text-sm text-slate-700">Email notifications</span>
+              <span class="ml-2 text-sm text-slate-700"
+                >Email notifications</span
+              >
             </label>
             <label class="flex items-center">
               <input
@@ -336,7 +448,9 @@
                 type="checkbox"
                 class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
               />
-              <span class="ml-2 text-sm text-slate-700">Browser notifications</span>
+              <span class="ml-2 text-sm text-slate-700"
+                >Browser notifications</span
+              >
             </label>
           </div>
         </div>
@@ -362,211 +476,213 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import Modal from './Modal.vue'
+import { ref, onMounted, reactive } from "vue";
+import { useRouter } from "vue-router";
+import Modal from "../UI/Modal.vue";
 
 interface SearchCriteria {
-  query?: string
-  category?: string
-  priceMin?: number
-  priceMax?: number
-  carat?: string
-  cut?: string
-  color?: string
-  clarity?: string
+  query?: string;
+  category?: string;
+  priceMin?: number;
+  priceMax?: number;
+  carat?: string;
+  cut?: string;
+  color?: string;
+  clarity?: string;
 }
 
 interface SavedSearch {
-  id: string
-  name: string
-  description?: string
-  criteria: SearchCriteria
-  resultCount: number
-  createdAt: Date
-  lastUsed?: Date
-  hasAlert: boolean
+  id: string;
+  name: string;
+  description?: string;
+  criteria: SearchCriteria;
+  resultCount: number;
+  createdAt: Date;
+  lastUsed?: Date;
+  hasAlert: boolean;
 }
 
 interface AlertForm {
-  name: string
-  type: 'price_drop' | 'new_arrival' | 'back_in_stock'
-  threshold: number
+  name: string;
+  type: "price_drop" | "new_arrival" | "back_in_stock";
+  threshold: number;
   notifications: {
-    email: boolean
-    browser: boolean
-  }
+    email: boolean;
+    browser: boolean;
+  };
 }
 
 // State
-const isLoading = ref(true)
-const savedSearches = ref<SavedSearch[]>([])
-const activeDropdown = ref<string | null>(null)
-const showCreateModal = ref(false)
-const showEditModal = ref(false)
-const showShareModal = ref(false)
-const showAlertModal = ref(false)
-const shareUrl = ref('')
-const copied = ref(false)
-const selectedSearch = ref<SavedSearch | null>(null)
+const isLoading = ref(true);
+const savedSearches = ref<SavedSearch[]>([]);
+const activeDropdown = ref<string | null>(null);
+const showCreateModal = ref(false);
+const showEditModal = ref(false);
+const showShareModal = ref(false);
+const showAlertModal = ref(false);
+const shareUrl = ref("");
+const copied = ref(false);
+const selectedSearch = ref<SavedSearch | null>(null);
 
-const router = useRouter()
+const router = useRouter();
 
 // Forms
 const searchForm = reactive({
-  id: '',
-  name: '',
-  description: '',
+  id: "",
+  name: "",
+  description: "",
   criteria: {} as SearchCriteria,
-  enableAlert: false
-})
+  enableAlert: false,
+});
 
 const alertForm = reactive<AlertForm>({
-  name: '',
-  type: 'price_drop',
+  name: "",
+  type: "price_drop",
   threshold: 10,
   notifications: {
     email: true,
-    browser: false
-  }
-})
+    browser: false,
+  },
+});
 
 // Mock data
 const mockSavedSearches: SavedSearch[] = [
   {
-    id: '1',
-    name: 'Blue Sapphires Under $15k',
-    description: 'High-quality blue sapphires within my budget range',
+    id: "1",
+    name: "Blue Sapphires Under $15k",
+    description: "High-quality blue sapphires within my budget range",
     criteria: {
-      query: 'sapphire',
-      category: 'Sapphire',
+      query: "sapphire",
+      category: "Sapphire",
       priceMax: 15000,
-      color: 'Blue',
-      clarity: 'VVS1'
+      color: "Blue",
+      clarity: "VVS1",
     },
     resultCount: 24,
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     lastUsed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    hasAlert: true
+    hasAlert: true,
   },
   {
-    id: '2',
-    name: 'Emerald Cut Diamonds',
+    id: "2",
+    name: "Emerald Cut Diamonds",
     criteria: {
-      cut: 'Emerald',
-      category: 'Diamond',
+      cut: "Emerald",
+      category: "Diamond",
       priceMin: 5000,
-      priceMax: 25000
+      priceMax: 25000,
     },
     resultCount: 18,
     createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
     lastUsed: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    hasAlert: false
+    hasAlert: false,
   },
   {
-    id: '3',
-    name: 'Vintage Ruby Collection',
-    description: 'Antique and vintage ruby pieces for investment',
+    id: "3",
+    name: "Vintage Ruby Collection",
+    description: "Antique and vintage ruby pieces for investment",
     criteria: {
-      query: 'vintage ruby',
-      category: 'Ruby',
-      color: 'Pigeon Blood Red'
+      query: "vintage ruby",
+      category: "Ruby",
+      color: "Pigeon Blood Red",
     },
     resultCount: 12,
     createdAt: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000),
-    hasAlert: false
-  }
-]
+    hasAlert: false,
+  },
+];
 
 // Methods
 const loadSavedSearches = async () => {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    await new Promise(resolve => setTimeout(resolve, 800))
-    savedSearches.value = mockSavedSearches
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    savedSearches.value = mockSavedSearches;
   } catch (error) {
-    console.error('Error loading saved searches:', error)
+    console.error("Error loading saved searches:", error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 const toggleDropdown = (searchId: string) => {
-  activeDropdown.value = activeDropdown.value === searchId ? null : searchId
-}
+  activeDropdown.value = activeDropdown.value === searchId ? null : searchId;
+};
 
 const executeSearch = (search: SavedSearch) => {
   // Update last used date
-  search.lastUsed = new Date()
-  
+  search.lastUsed = new Date();
+
   // Navigate to search results with criteria
-  const queryParams = new URLSearchParams()
+  const queryParams = new URLSearchParams();
   Object.entries(search.criteria).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') {
-      queryParams.set(key, value.toString())
+    if (value !== undefined && value !== "") {
+      queryParams.set(key, value.toString());
     }
-  })
-  
-  router.push(`/products?${queryParams.toString()}`)
-  activeDropdown.value = null
-}
+  });
+
+  router.push(`/products?${queryParams.toString()}`);
+  activeDropdown.value = null;
+};
 
 const editSearch = (search: SavedSearch) => {
-  selectedSearch.value = search
-  searchForm.id = search.id
-  searchForm.name = search.name
-  searchForm.description = search.description || ''
-  searchForm.criteria = { ...search.criteria }
-  searchForm.enableAlert = search.hasAlert
-  showEditModal.value = true
-  activeDropdown.value = null
-}
+  selectedSearch.value = search;
+  searchForm.id = search.id;
+  searchForm.name = search.name;
+  searchForm.description = search.description || "";
+  searchForm.criteria = { ...search.criteria };
+  searchForm.enableAlert = search.hasAlert;
+  showEditModal.value = true;
+  activeDropdown.value = null;
+};
 
 const createAlert = (search: SavedSearch) => {
-  selectedSearch.value = search
-  alertForm.name = search.name + ' Alert'
-  showAlertModal.value = true
-  activeDropdown.value = null
-}
+  selectedSearch.value = search;
+  alertForm.name = search.name + " Alert";
+  showAlertModal.value = true;
+  activeDropdown.value = null;
+};
 
 const duplicateSearch = (search: SavedSearch) => {
   const newSearch: SavedSearch = {
     ...search,
     id: Date.now().toString(),
-    name: search.name + ' (Copy)',
+    name: search.name + " (Copy)",
     createdAt: new Date(),
     lastUsed: undefined,
-    hasAlert: false
-  }
-  savedSearches.value.unshift(newSearch)
-  activeDropdown.value = null
-}
+    hasAlert: false,
+  };
+  savedSearches.value.unshift(newSearch);
+  activeDropdown.value = null;
+};
 
 const shareSearch = (search: SavedSearch) => {
-  selectedSearch.value = search
-  shareUrl.value = `${window.location.origin}/search/shared/${search.id}`
-  showShareModal.value = true
-  activeDropdown.value = null
-}
+  selectedSearch.value = search;
+  shareUrl.value = `${window.location.origin}/search/shared/${search.id}`;
+  showShareModal.value = true;
+  activeDropdown.value = null;
+};
 
 const deleteSearch = (searchId: string) => {
-  if (confirm('Are you sure you want to delete this saved search?')) {
-    savedSearches.value = savedSearches.value.filter(s => s.id !== searchId)
+  if (confirm("Are you sure you want to delete this saved search?")) {
+    savedSearches.value = savedSearches.value.filter((s) => s.id !== searchId);
   }
-  activeDropdown.value = null
-}
+  activeDropdown.value = null;
+};
 
 const saveSearch = () => {
   if (showEditModal.value && selectedSearch.value) {
     // Update existing search
-    const index = savedSearches.value.findIndex(s => s.id === selectedSearch.value!.id)
+    const index = savedSearches.value.findIndex(
+      (s) => s.id === selectedSearch.value!.id
+    );
     if (index !== -1) {
       savedSearches.value[index] = {
         ...savedSearches.value[index],
         name: searchForm.name,
         description: searchForm.description,
-        hasAlert: searchForm.enableAlert
-      }
+        hasAlert: searchForm.enableAlert,
+      };
     }
   } else {
     // Create new search
@@ -577,120 +693,126 @@ const saveSearch = () => {
       criteria: { ...searchForm.criteria },
       resultCount: Math.floor(Math.random() * 50) + 1,
       createdAt: new Date(),
-      hasAlert: searchForm.enableAlert
-    }
-    savedSearches.value.unshift(newSearch)
+      hasAlert: searchForm.enableAlert,
+    };
+    savedSearches.value.unshift(newSearch);
   }
-  
-  closeModal()
-}
+
+  closeModal();
+};
 
 const createPriceAlert = () => {
   if (selectedSearch.value) {
-    selectedSearch.value.hasAlert = true
+    selectedSearch.value.hasAlert = true;
     // Here you would typically create the alert in your backend
-    console.log('Creating alert:', alertForm)
+    console.log("Creating alert:", alertForm);
   }
-  showAlertModal.value = false
-}
+  showAlertModal.value = false;
+};
 
 const closeModal = () => {
-  showCreateModal.value = false
-  showEditModal.value = false
-  selectedSearch.value = null
-  
+  showCreateModal.value = false;
+  showEditModal.value = false;
+  selectedSearch.value = null;
+
   // Reset form
-  searchForm.id = ''
-  searchForm.name = ''
-  searchForm.description = ''
-  searchForm.criteria = {}
-  searchForm.enableAlert = false
-}
+  searchForm.id = "";
+  searchForm.name = "";
+  searchForm.description = "";
+  searchForm.criteria = {};
+  searchForm.enableAlert = false;
+};
 
 const copyToClipboard = async () => {
   try {
-    await navigator.clipboard.writeText(shareUrl.value)
-    copied.value = true
+    await navigator.clipboard.writeText(shareUrl.value);
+    copied.value = true;
     setTimeout(() => {
-      copied.value = false
-    }, 2000)
+      copied.value = false;
+    }, 2000);
   } catch (error) {
-    console.error('Failed to copy to clipboard:', error)
+    console.error("Failed to copy to clipboard:", error);
   }
-}
+};
 
 const shareViaEmail = () => {
-  const subject = `Check out this gemstone search: ${selectedSearch.value?.name}`
-  const body = `I found this interesting search on our gemstone platform: ${shareUrl.value}`
-  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-}
+  const subject = `Check out this gemstone search: ${selectedSearch.value?.name}`;
+  const body = `I found this interesting search on our gemstone platform: ${shareUrl.value}`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+};
 
 const shareViaSMS = () => {
-  const message = `Check out this gemstone search: ${shareUrl.value}`
-  window.location.href = `sms:?body=${encodeURIComponent(message)}`
-}
+  const message = `Check out this gemstone search: ${shareUrl.value}`;
+  window.location.href = `sms:?body=${encodeURIComponent(message)}`;
+};
 
 const formatCriteriaKey = (key: string): string => {
   const keyMap: Record<string, string> = {
-    query: 'Search',
-    category: 'Category',
-    priceMin: 'Min Price',
-    priceMax: 'Max Price',
-    carat: 'Carat',
-    cut: 'Cut',
-    color: 'Color',
-    clarity: 'Clarity'
-  }
-  return keyMap[key] || key
-}
+    query: "Search",
+    category: "Category",
+    priceMin: "Min Price",
+    priceMax: "Max Price",
+    carat: "Carat",
+    cut: "Cut",
+    color: "Color",
+    clarity: "Clarity",
+  };
+  return keyMap[key] || key;
+};
 
 const formatCriteriaValue = (value: any): string => {
-  if (typeof value === 'number') {
-    return value >= 1000 ? `${(value / 1000).toFixed(0)}k` : `${value}`
+  if (typeof value === "number") {
+    return value >= 1000 ? `${(value / 1000).toFixed(0)}k` : `${value}`;
   }
-  return String(value)
-}
+  return String(value);
+};
 
 const formatDate = (date: Date): string => {
-  const now = new Date()
-  const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
-  
-  if (diffInDays === 0) return 'Today'
-  if (diffInDays === 1) return 'Yesterday'
-  if (diffInDays < 7) return `${diffInDays} days ago`
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`
-  return date.toLocaleDateString()
-}
+  const now = new Date();
+  const diffInDays = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffInDays === 0) return "Today";
+  if (diffInDays === 1) return "Yesterday";
+  if (diffInDays < 7) return `${diffInDays} days ago`;
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
+  return date.toLocaleDateString();
+};
 
 // Click outside directive
 const vClickOutside = {
   mounted(el: HTMLElement, binding: any) {
     el._clickOutsideHandler = (event: Event) => {
       if (!el.contains(event.target as Node)) {
-        binding.value()
+        binding.value();
       }
-    }
-    document.addEventListener('click', el._clickOutsideHandler)
+    };
+    document.addEventListener("click", el._clickOutsideHandler);
   },
   unmounted(el: HTMLElement) {
-    document.removeEventListener('click', el._clickOutsideHandler)
-    delete el._clickOutsideHandler
-  }
-}
+    document.removeEventListener("click", el._clickOutsideHandler);
+    delete el._clickOutsideHandler;
+  },
+};
 
 // Lifecycle
 onMounted(() => {
-  loadSavedSearches()
-  
+  loadSavedSearches();
+
   // Mock current search criteria from URL params
-  const urlParams = new URLSearchParams(window.location.search)
+  const urlParams = new URLSearchParams(window.location.search);
   searchForm.criteria = {
-    query: urlParams.get('query') || '',
-    category: urlParams.get('category') || '',
-    priceMin: urlParams.get('priceMin') ? parseInt(urlParams.get('priceMin')!) : undefined,
-    priceMax: urlParams.get('priceMax') ? parseInt(urlParams.get('priceMax')!) : undefined
-  }
-})
+    query: urlParams.get("query") || "",
+    category: urlParams.get("category") || "",
+    priceMin: urlParams.get("priceMin")
+      ? parseInt(urlParams.get("priceMin")!)
+      : undefined,
+    priceMax: urlParams.get("priceMax")
+      ? parseInt(urlParams.get("priceMax")!)
+      : undefined,
+  };
+});
 </script>
 
 <style scoped>

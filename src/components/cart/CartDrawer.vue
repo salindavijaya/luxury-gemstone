@@ -20,8 +20,13 @@
         aria-modal="true"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between p-4 border-b border-slate-200">
-          <h2 id="cart-drawer-title" class="text-lg font-semibold text-slate-800">
+        <div
+          class="flex items-center justify-between p-4 border-b border-slate-200"
+        >
+          <h2
+            id="cart-drawer-title"
+            class="text-lg font-semibold text-slate-800"
+          >
             Shopping Cart ({{ cartStore.itemCount }})
           </h2>
           <button
@@ -37,12 +42,17 @@
         <div class="flex-1 overflow-y-auto">
           <!-- Loading State -->
           <div v-if="isLoading" class="p-6 text-center">
-            <div class="animate-spin w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <div
+              class="animate-spin w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full mx-auto mb-4"
+            ></div>
             <p class="text-slate-600">Loading cart...</p>
           </div>
 
           <!-- Empty Cart -->
-          <CartEmpty v-else-if="cartStore.items.length === 0" :show-continue-shopping="false" />
+          <CartEmpty
+            v-else-if="cartStore.items.length === 0"
+            :show-continue-shopping="false"
+          />
 
           <!-- Cart Items -->
           <div v-else class="p-4 space-y-4">
@@ -59,8 +69,13 @@
             </TransitionGroup>
 
             <!-- Recently Removed Items -->
-            <div v-if="cartStore.recentlyRemoved.length > 0" class="pt-4 border-t border-slate-200">
-              <h3 class="text-sm font-medium text-slate-700 mb-3">Recently Removed</h3>
+            <div
+              v-if="cartStore.recentlyRemoved.length > 0"
+              class="pt-4 border-t border-slate-200"
+            >
+              <h3 class="text-sm font-medium text-slate-700 mb-3">
+                Recently Removed
+              </h3>
               <div class="space-y-2">
                 <div
                   v-for="item in cartStore.recentlyRemoved.slice(0, 2)"
@@ -73,8 +88,12 @@
                     class="w-10 h-10 object-cover rounded"
                   />
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-slate-700 truncate">{{ item.name }}</p>
-                    <p class="text-xs text-slate-500">${{ item.price.toLocaleString() }}</p>
+                    <p class="text-sm font-medium text-slate-700 truncate">
+                      {{ item.name }}
+                    </p>
+                    <p class="text-xs text-slate-500">
+                      ${{ item.price.toLocaleString() }}
+                    </p>
                   </div>
                   <button
                     @click="cartStore.restoreItem(item)"
@@ -89,20 +108,36 @@
         </div>
 
         <!-- Footer with Summary and Actions -->
-        <div v-if="cartStore.items.length > 0" class="border-t border-slate-200 p-4 bg-slate-50">
+        <div
+          v-if="cartStore.items.length > 0"
+          class="border-t border-slate-200 p-4 bg-slate-50"
+        >
           <!-- Quick Summary -->
           <div class="space-y-2 mb-4">
             <div class="flex justify-between text-sm">
               <span class="text-slate-600">Subtotal</span>
-              <span class="font-medium">${{ cartStore.subtotal.toLocaleString() }}</span>
+              <span class="font-medium"
+                >${{ cartStore.subtotal.toLocaleString() }}</span
+              >
             </div>
-            <div v-if="cartStore.discountAmount > 0" class="flex justify-between text-sm text-emerald-600">
+            <div
+              v-if="cartStore.discountAmount > 0"
+              class="flex justify-between text-sm text-emerald-600"
+            >
               <span>Discount</span>
               <span>-${{ cartStore.discountAmount.toLocaleString() }}</span>
             </div>
-            <div class="flex justify-between font-semibold text-slate-800 pt-2 border-t border-slate-300">
+            <div
+              class="flex justify-between font-semibold text-slate-800 pt-2 border-t border-slate-300"
+            >
               <span>Total</span>
-              <span>${{ (cartStore.subtotal - cartStore.discountAmount).toLocaleString() }}</span>
+              <span
+                >${{
+                  (
+                    cartStore.subtotal - cartStore.discountAmount
+                  ).toLocaleString()
+                }}</span
+              >
             </div>
             <p class="text-xs text-slate-500">
               Shipping, taxes, and insurance calculated at checkout
@@ -117,7 +152,9 @@
               class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <template v-if="isProcessing">
-                <div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                <div
+                  class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                ></div>
                 Processing...
               </template>
               <template v-else>
@@ -142,7 +179,9 @@
           </div>
 
           <!-- Trust Indicators -->
-          <div class="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-slate-300">
+          <div
+            class="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-slate-300"
+          >
             <div class="flex items-center gap-1 text-xs text-slate-500">
               <ShieldCheckIcon class="w-4 h-4" />
               <span>SSL Secured</span>
@@ -163,79 +202,79 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCartStore } from '@/stores/cart'
-import CartEmpty from './CartEmpty.vue'
-import CartItem from './CartItem.vue'
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import { useCartStore } from "@/stores/cart";
+import CartEmpty from "./CartEmpty.vue";
+import CartItem from "./CartItem.vue";
 import {
   XMarkIcon,
   LockClosedIcon,
   ShieldCheckIcon,
   TruckIcon,
-  CheckBadgeIcon
-} from '@heroicons/vue/24/outline'
+  CheckBadgeIcon,
+} from "@heroicons/vue/24/outline";
 
 interface Props {
-  isOpen: boolean
+  isOpen: boolean;
 }
 
 interface Emits {
-  (e: 'close'): void
-  (e: 'view-cart'): void
+  (e: "close"): void;
+  (e: "view-cart"): void;
 }
 
-defineProps<Props>()
-const emit = defineEmits<Emits>()
+defineProps<Props>();
+const emit = defineEmits<Emits>();
 
-const router = useRouter()
-const cartStore = useCartStore()
+const router = useRouter();
+const cartStore = useCartStore();
 
-const isLoading = ref(false)
-const isProcessing = ref(false)
+const isLoading = ref(false);
+const isProcessing = ref(false);
 
 // Close drawer when escape key is pressed
 const handleEscapeKey = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    close()
+  if (event.key === "Escape") {
+    close();
   }
-}
+};
 
 const close = () => {
-  emit('close')
-}
+  emit("close");
+};
 
 const viewFullCart = () => {
-  emit('view-cart')
-  router.push('/cart')
-}
+  emit("view-cart");
+  router.push("/cart");
+};
 
 const goToCheckout = async () => {
-  isProcessing.value = true
-  
+  isProcessing.value = true;
+
   // Simulate validation/processing
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
   try {
-    close()
-    await router.push('/checkout')
+    close();
+    await router.push("/checkout");
   } catch (error) {
-    console.error('Navigation error:', error)
+    console.error("Navigation error:", error);
   } finally {
-    isProcessing.value = false
+    isProcessing.value = false;
   }
-}
+};
 
 onMounted(() => {
-  document.addEventListener('keydown', handleEscapeKey)
+  document.addEventListener("keydown", handleEscapeKey);
   // Prevent body scroll when drawer is open
-  document.body.style.overflow = 'hidden'
-})
+  document.body.style.overflow = "hidden";
+});
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleEscapeKey)
-  document.body.style.overflow = ''
-})
+  document.removeEventListener("keydown", handleEscapeKey);
+  document.body.style.overflow = "";
+});
 </script>
 
 <style scoped>

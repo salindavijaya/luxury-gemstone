@@ -1,14 +1,18 @@
 <template>
-  <div :class="[
-    'bg-white border border-slate-200 rounded-lg p-4 transition-all duration-200',
-    { 'shadow-md': !compact, 'shadow-sm': compact }
-  ]">
+  <div
+    :class="[
+      'bg-white border border-slate-200 rounded-lg p-4 transition-all duration-200',
+      { 'shadow-md': !compact, 'shadow-sm': compact },
+    ]"
+  >
     <div :class="['flex gap-4', compact ? 'items-start' : 'items-center']">
       <!-- Product Image -->
-      <div :class="[
-        'flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden',
-        compact ? 'w-16 h-16' : 'w-20 h-20 md:w-24 md:h-24'
-      ]">
+      <div
+        :class="[
+          'flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden',
+          compact ? 'w-16 h-16' : 'w-20 h-20 md:w-24 md:h-24',
+        ]"
+      >
         <img
           :src="item.image"
           :alt="item.name"
@@ -19,34 +23,54 @@
 
       <!-- Product Details -->
       <div class="flex-1 min-w-0">
-        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+        <div
+          class="flex flex-col md:flex-row md:items-start md:justify-between gap-2"
+        >
           <!-- Product Info -->
           <div class="flex-1 min-w-0">
-            <h3 :class="[
-              'font-semibold text-slate-800 truncate',
-              compact ? 'text-sm' : 'text-base'
-            ]">
+            <h3
+              :class="[
+                'font-semibold text-slate-800 truncate',
+                compact ? 'text-sm' : 'text-base',
+              ]"
+            >
               {{ item.name }}
             </h3>
-            
-            <div :class="['text-slate-600 space-y-1', compact ? 'text-xs' : 'text-sm']">
+
+            <div
+              :class="[
+                'text-slate-600 space-y-1',
+                compact ? 'text-xs' : 'text-sm',
+              ]"
+            >
               <p>{{ item.category }}</p>
-              <div v-if="!compact && (item.weight || item.cut || item.clarity || item.color)" 
-                   class="flex flex-wrap gap-2 text-xs">
+              <div
+                v-if="
+                  !compact &&
+                  (item.weight || item.cut || item.clarity || item.color)
+                "
+                class="flex flex-wrap gap-2 text-xs"
+              >
                 <span v-if="item.weight" class="bg-slate-100 px-2 py-1 rounded">
                   {{ item.weight }}ct
                 </span>
                 <span v-if="item.cut" class="bg-slate-100 px-2 py-1 rounded">
                   {{ item.cut }}
                 </span>
-                <span v-if="item.clarity" class="bg-slate-100 px-2 py-1 rounded">
+                <span
+                  v-if="item.clarity"
+                  class="bg-slate-100 px-2 py-1 rounded"
+                >
                   {{ item.clarity }}
                 </span>
                 <span v-if="item.color" class="bg-slate-100 px-2 py-1 rounded">
                   {{ item.color }}
                 </span>
               </div>
-              <div v-if="item.certification" class="flex items-center gap-1 text-emerald-600">
+              <div
+                v-if="item.certification"
+                class="flex items-center gap-1 text-emerald-600"
+              >
                 <CheckBadgeIcon class="w-3 h-3" />
                 <span class="text-xs">{{ item.certification }} Certified</span>
               </div>
@@ -55,17 +79,21 @@
             <!-- Price -->
             <div class="mt-2">
               <div class="flex items-center gap-2">
-                <span :class="[
-                  'font-bold text-slate-800',
-                  compact ? 'text-sm' : 'text-lg'
-                ]">
+                <span
+                  :class="[
+                    'font-bold text-slate-800',
+                    compact ? 'text-sm' : 'text-lg',
+                  ]"
+                >
                   ${{ item.price.toLocaleString() }}
                 </span>
-                <span v-if="item.originalPrice && item.originalPrice > item.price" 
-                      :class="[
-                        'line-through text-slate-500',
-                        compact ? 'text-xs' : 'text-sm'
-                      ]">
+                <span
+                  v-if="item.originalPrice && item.originalPrice > item.price"
+                  :class="[
+                    'line-through text-slate-500',
+                    compact ? 'text-xs' : 'text-sm',
+                  ]"
+                >
                   ${{ item.originalPrice.toLocaleString() }}
                 </span>
               </div>
@@ -73,44 +101,48 @@
           </div>
 
           <!-- Quantity and Actions -->
-          <div :class="[
-            'flex items-center gap-3',
-            compact ? 'flex-col items-end' : 'md:flex-col md:items-end'
-          ]">
+          <div
+            :class="[
+              'flex items-center gap-3',
+              compact ? 'flex-col items-end' : 'md:flex-col md:items-end',
+            ]"
+          >
             <!-- Quantity Controls -->
-            <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden">
+            <div
+              class="flex items-center border border-slate-300 rounded-lg overflow-hidden"
+            >
               <button
                 @click="decreaseQuantity"
                 :disabled="item.quantity <= 1"
                 :class="[
                   'px-2 py-1 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
-                  compact ? 'text-xs' : 'text-sm'
+                  compact ? 'text-xs' : 'text-sm',
                 ]"
                 :aria-label="`Decrease quantity of ${item.name}`"
               >
                 <MinusIcon :class="compact ? 'w-3 h-3' : 'w-4 h-4'" />
               </button>
-              
+
               <input
                 :value="item.quantity"
                 @input="handleQuantityInput"
                 @blur="handleQuantityBlur"
                 :class="[
                   'text-center border-none outline-none bg-white',
-                  compact ? 'w-8 text-xs py-1' : 'w-12 text-sm py-1'
+                  compact ? 'w-8 text-xs py-1' : 'w-12 text-sm py-1',
                 ]"
                 type="number"
                 min="1"
                 max="10"
                 :aria-label="`Quantity of ${item.name}`"
               />
-              
+
               <button
                 @click="increaseQuantity"
                 :disabled="item.quantity >= 10"
                 :class="[
                   'px-2 py-1 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
-                  compact ? 'text-xs' : 'text-sm'
+                  compact ? 'text-xs' : 'text-sm',
                 ]"
                 :aria-label="`Increase quantity of ${item.name}`"
               >
@@ -123,7 +155,7 @@
               @click="handleRemove"
               :class="[
                 'text-slate-400 hover:text-red-500 transition-colors',
-                compact ? 'p-1' : 'p-2'
+                compact ? 'p-1' : 'p-2',
               ]"
               :aria-label="`Remove ${item.name} from cart`"
             >
@@ -145,8 +177,12 @@
               />
               <div class="flex-1">
                 <div class="flex items-center gap-2">
-                  <ShieldCheckIcon class="w-4 h-4 text-slate-500 group-hover:text-emerald-600 transition-colors" />
-                  <span class="text-sm font-medium text-slate-700">Insurance Coverage</span>
+                  <ShieldCheckIcon
+                    class="w-4 h-4 text-slate-500 group-hover:text-emerald-600 transition-colors"
+                  />
+                  <span class="text-sm font-medium text-slate-700"
+                    >Insurance Coverage</span
+                  >
                 </div>
                 <p class="text-xs text-slate-500 mt-1">
                   Protect your investment (+2% of item value)
@@ -167,15 +203,17 @@
               />
               <div class="flex-1">
                 <div class="flex items-center gap-2">
-                  <DocumentCheckIcon class="w-4 h-4 text-slate-500 group-hover:text-emerald-600 transition-colors" />
-                  <span class="text-sm font-medium text-slate-700">Professional Appraisal</span>
+                  <DocumentCheckIcon
+                    class="w-4 h-4 text-slate-500 group-hover:text-emerald-600 transition-colors"
+                  />
+                  <span class="text-sm font-medium text-slate-700"
+                    >Professional Appraisal</span
+                  >
                 </div>
                 <p class="text-xs text-slate-500 mt-1">
                   Certified gemologist evaluation
                 </p>
-                <p class="text-xs font-medium text-emerald-600">
-                  +$150.00
-                </p>
+                <p class="text-xs font-medium text-emerald-600">+$150.00</p>
               </div>
             </label>
           </div>
@@ -190,7 +228,7 @@
               <PlusIcon class="w-4 h-4" />
               Add special instructions
             </button>
-            
+
             <div v-else class="space-y-2">
               <label class="block text-sm font-medium text-slate-700">
                 Special Instructions
@@ -209,7 +247,10 @@
                 </span>
                 <button
                   v-if="!item.specialInstructions"
-                  @click="showInstructions = false; localInstructions = ''"
+                  @click="
+                    showInstructions = false;
+                    localInstructions = '';
+                  "
                   class="text-xs text-slate-500 hover:text-slate-700"
                 >
                   Cancel
@@ -239,112 +280,117 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import type { CartItem } from '@/stores/cart'
+import { ref, computed, watch } from "vue";
+import type { CartItem } from "@/stores/cart";
 import {
   MinusIcon,
   PlusIcon,
   TrashIcon,
   CheckBadgeIcon,
   ShieldCheckIcon,
-  DocumentCheckIcon
-} from '@heroicons/vue/24/outline'
+  DocumentCheckIcon,
+} from "@heroicons/vue/24/outline";
 
 interface Props {
-  item: CartItem
-  compact?: boolean
+  item: CartItem;
+  compact?: boolean;
 }
 
 interface Emits {
-  (e: 'update-quantity', itemId: string, quantity: number): void
-  (e: 'remove', itemId: string): void
-  (e: 'toggle-insurance', itemId: string): void
-  (e: 'toggle-appraisal', itemId: string): void
-  (e: 'update-instructions', itemId: string, instructions: string): void
+  (e: "update-quantity", itemId: string, quantity: number): void;
+  (e: "remove", itemId: string): void;
+  (e: "toggle-insurance", itemId: string): void;
+  (e: "toggle-appraisal", itemId: string): void;
+  (e: "update-instructions", itemId: string, instructions: string): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  compact: false
-})
+  compact: false,
+});
 
-const emit = defineEmits<Emits>()
+const emit = defineEmits<Emits>();
 
 // Local state for special instructions
-const showInstructions = ref(!!props.item.specialInstructions)
-const localInstructions = ref(props.item.specialInstructions || '')
+const showInstructions = ref(!!props.item.specialInstructions);
+const localInstructions = ref(props.item.specialInstructions || "");
 
 // Computed values
 const itemTotal = computed(() => {
-  const baseTotal = props.item.price * props.item.quantity
-  const insurance = props.item.insuranceSelected ? baseTotal * 0.02 : 0
-  const appraisal = props.item.appraisalRequested ? 150 : 0
-  return baseTotal + insurance + appraisal
-})
+  const baseTotal = props.item.price * props.item.quantity;
+  const insurance = props.item.insuranceSelected ? baseTotal * 0.02 : 0;
+  const appraisal = props.item.appraisalRequested ? 150 : 0;
+  return baseTotal + insurance + appraisal;
+});
 
 const additionalCosts = computed(() => {
-  const insurance = props.item.insuranceSelected ? props.item.price * props.item.quantity * 0.02 : 0
-  const appraisal = props.item.appraisalRequested ? 150 : 0
-  return insurance + appraisal
-})
+  const insurance = props.item.insuranceSelected
+    ? props.item.price * props.item.quantity * 0.02
+    : 0;
+  const appraisal = props.item.appraisalRequested ? 150 : 0;
+  return insurance + appraisal;
+});
 
 // Event handlers
 const decreaseQuantity = () => {
   if (props.item.quantity > 1) {
-    emit('update-quantity', props.item.id, props.item.quantity - 1)
+    emit("update-quantity", props.item.id, props.item.quantity - 1);
   }
-}
+};
 
 const increaseQuantity = () => {
   if (props.item.quantity < 10) {
-    emit('update-quantity', props.item.id, props.item.quantity + 1)
+    emit("update-quantity", props.item.id, props.item.quantity + 1);
   }
-}
+};
 
 const handleQuantityInput = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const value = parseInt(input.value)
-  
+  const input = event.target as HTMLInputElement;
+  const value = parseInt(input.value);
+
   if (!isNaN(value) && value >= 1 && value <= 10) {
-    emit('update-quantity', props.item.id, value)
+    emit("update-quantity", props.item.id, value);
   } else {
     // Reset to current quantity if invalid
-    input.value = props.item.quantity.toString()
+    input.value = props.item.quantity.toString();
   }
-}
+};
 
 const handleQuantityBlur = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const value = parseInt(input.value)
-  
+  const input = event.target as HTMLInputElement;
+  const value = parseInt(input.value);
+
   if (isNaN(value) || value < 1) {
-    input.value = '1'
-    emit('update-quantity', props.item.id, 1)
+    input.value = "1";
+    emit("update-quantity", props.item.id, 1);
   } else if (value > 10) {
-    input.value = '10'
-    emit('update-quantity', props.item.id, 10)
+    input.value = "10";
+    emit("update-quantity", props.item.id, 10);
   }
-}
+};
 
 const handleRemove = () => {
-  emit('remove', props.item.id)
-}
+  emit("remove", props.item.id);
+};
 
 const handleInsuranceToggle = () => {
-  emit('toggle-insurance', props.item.id)
-}
+  emit("toggle-insurance", props.item.id);
+};
 
 const handleAppraisalToggle = () => {
-  emit('toggle-appraisal', props.item.id)
-}
+  emit("toggle-appraisal", props.item.id);
+};
 
 const updateInstructions = () => {
-  emit('update-instructions', props.item.id, localInstructions.value)
-}
+  emit("update-instructions", props.item.id, localInstructions.value);
+};
 
 // Watch for external changes to instructions
-watch(() => props.item.specialInstructions, (newVal) => {
-  localInstructions.value = newVal || ''
-})
+watch(
+  () => props.item.specialInstructions,
+  (newVal) => {
+    localInstructions.value = newVal || "";
+  }
+);
 </script>
 
 <style scoped>

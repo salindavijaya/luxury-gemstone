@@ -39,11 +39,16 @@
           <span class="text-base">{{ currency.flag }}</span>
           <span class="font-medium">{{ currency.code }}</span>
           <span class="text-gray-600 truncate">{{ currency.name }}</span>
-          <span class="ml-auto text-xs text-gray-500">{{ currency.symbol }}</span>
+          <span class="ml-auto text-xs text-gray-500">{{
+            currency.symbol
+          }}</span>
         </div>
-        
+
         <!-- No results -->
-        <div v-if="filteredCurrencies.length === 0" class="px-3 py-4 text-center text-gray-500 text-sm">
+        <div
+          v-if="filteredCurrencies.length === 0"
+          class="px-3 py-4 text-center text-gray-500 text-sm"
+        >
           No currencies found
         </div>
       </div>
@@ -54,19 +59,28 @@
       <span class="text-lg font-semibold text-gray-900">
         {{ formattedPrice }}
       </span>
-      <span v-if="showOriginalPrice && convertedPrice !== basePrice" class="text-sm text-gray-500 line-through">
+      <span
+        v-if="showOriginalPrice && convertedPrice !== basePrice"
+        class="text-sm text-gray-500 line-through"
+      >
         {{ formatPrice(basePrice, baseCurrency) }}
       </span>
     </div>
 
     <!-- Exchange Rate Info -->
-    <div v-if="showExchangeRate && selectedCurrency.code !== baseCurrency" class="text-xs text-gray-500">
-      1 {{ baseCurrency }} = {{ exchangeRate.toFixed(4) }} {{ selectedCurrency.code }}
+    <div
+      v-if="showExchangeRate && selectedCurrency.code !== baseCurrency"
+      class="text-xs text-gray-500"
+    >
+      1 {{ baseCurrency }} = {{ exchangeRate.toFixed(4) }}
+      {{ selectedCurrency.code }}
     </div>
 
     <!-- Loading/Error States -->
     <div v-if="isLoading" class="flex items-center">
-      <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-emerald-600"></div>
+      <div
+        class="animate-spin rounded-full h-3 w-3 border-b-2 border-emerald-600"
+      ></div>
     </div>
 
     <div v-if="error" class="flex items-center text-red-500 text-xs">
@@ -77,8 +91,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { ChevronDown, AlertCircle } from 'lucide-vue-next';
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { ChevronDown, AlertCircle } from "lucide-vue-next";
 
 export interface Currency {
   code: string;
@@ -104,53 +118,107 @@ export interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  baseCurrency: 'USD',
-  defaultCurrency: 'USD',
+  baseCurrency: "USD",
+  defaultCurrency: "USD",
   showOriginalPrice: true,
   showExchangeRate: false,
   updateInterval: 3600000, // 1 hour
-  allowedCurrencies: () => []
+  allowedCurrencies: () => [],
 });
 
 const emit = defineEmits<{
-  'currency-change': [currency: string, price: number];
-  'rate-update': [rates: ExchangeRates];
-  'error': [error: string];
+  "currency-change": [currency: string, price: number];
+  "rate-update": [rates: ExchangeRates];
+  error: [error: string];
 }>();
 
 // Available currencies with comprehensive list
 const availableCurrencies: Currency[] = [
-  { code: 'USD', name: 'US Dollar', symbol: ', flag: '🇺🇸', decimals: 2 },
-  { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺', decimals: 2 },
-  { code: 'GBP', name: 'British Pound', symbol: '£', flag: '🇬🇧', decimals: 2 },
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥', flag: '🇯🇵', decimals: 0 },
-  { code: 'AUD', name: 'Australian Dollar', symbol: 'A, flag: '🇦🇺', decimals: 2 },
-  { code: 'CAD', name: 'Canadian Dollar', symbol: 'C, flag: '🇨🇦', decimals: 2 },
-  { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', flag: '🇨🇭', decimals: 2 },
-  { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', flag: '🇨🇳', decimals: 2 },
-  { code: 'SEK', name: 'Swedish Krona', symbol: 'kr', flag: '🇸🇪', decimals: 2 },
-  { code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ, flag: '🇳🇿', decimals: 2 },
-  { code: 'MXN', name: 'Mexican Peso', symbol: ', flag: '🇲🇽', decimals: 2 },
-  { code: 'SGD', name: 'Singapore Dollar', symbol: 'S, flag: '🇸🇬', decimals: 2 },
-  { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK, flag: '🇭🇰', decimals: 2 },
-  { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr', flag: '🇳🇴', decimals: 2 },
-  { code: 'KRW', name: 'South Korean Won', symbol: '₩', flag: '🇰🇷', decimals: 0 },
-  { code: 'TRY', name: 'Turkish Lira', symbol: '₺', flag: '🇹🇷', decimals: 2 },
-  { code: 'RUB', name: 'Russian Ruble', symbol: '₽', flag: '🇷🇺', decimals: 2 },
-  { code: 'INR', name: 'Indian Rupee', symbol: '₹', flag: '🇮🇳', decimals: 2 },
-  { code: 'BRL', name: 'Brazilian Real', symbol: 'R, flag: '🇧🇷', decimals: 2 },
-  { code: 'ZAR', name: 'South African Rand', symbol: 'R', flag: '🇿🇦', decimals: 2 },
-  { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs', flag: '🇱🇰', decimals: 2 }
+  { code: "USD", name: "US Dollar", symbol: "$", flag: "🇺🇸", decimals: 2 },
+  { code: "EUR", name: "Euro", symbol: "€", flag: "🇪🇺", decimals: 2 },
+  { code: "GBP", name: "British Pound", symbol: "£", flag: "🇬🇧", decimals: 2 },
+  { code: "JPY", name: "Japanese Yen", symbol: "¥", flag: "🇯🇵", decimals: 0 },
+  {
+    code: "AUD",
+    name: "Australian Dollar",
+    symbol: "A",
+    flag: "🇦🇺",
+    decimals: 2,
+  },
+  {
+    code: "CAD",
+    name: "Canadian Dollar",
+    symbol: "C",
+    flag: "🇨🇦",
+    decimals: 2,
+  },
+  { code: "CHF", name: "Swiss Franc", symbol: "CHF", flag: "🇨🇭", decimals: 2 },
+  { code: "CNY", name: "Chinese Yuan", symbol: "¥", flag: "🇨🇳", decimals: 2 },
+  { code: "SEK", name: "Swedish Krona", symbol: "kr", flag: "🇸🇪", decimals: 2 },
+  {
+    code: "NZD",
+    name: "New Zealand Dollar",
+    symbol: "NZ",
+    flag: "🇳🇿",
+    decimals: 2,
+  },
+  { code: "MXN", name: "Mexican Peso", symbol: "MP", flag: "🇲🇽", decimals: 2 },
+  {
+    code: "SGD",
+    name: "Singapore Dollar",
+    symbol: "S",
+    flag: "🇸🇬",
+    decimals: 2,
+  },
+  {
+    code: "HKD",
+    name: "Hong Kong Dollar",
+    symbol: "HK",
+    flag: "🇭🇰",
+    decimals: 2,
+  },
+  {
+    code: "NOK",
+    name: "Norwegian Krone",
+    symbol: "kr",
+    flag: "🇳🇴",
+    decimals: 2,
+  },
+  {
+    code: "KRW",
+    name: "South Korean Won",
+    symbol: "₩",
+    flag: "🇰🇷",
+    decimals: 0,
+  },
+  { code: "TRY", name: "Turkish Lira", symbol: "₺", flag: "🇹🇷", decimals: 2 },
+  { code: "RUB", name: "Russian Ruble", symbol: "₽", flag: "🇷🇺", decimals: 2 },
+  { code: "INR", name: "Indian Rupee", symbol: "₹", flag: "🇮🇳", decimals: 2 },
+  { code: "BRL", name: "Brazilian Real", symbol: "R", flag: "🇧🇷", decimals: 2 },
+  {
+    code: "ZAR",
+    name: "South African Rand",
+    symbol: "R",
+    flag: "🇿🇦",
+    decimals: 2,
+  },
+  {
+    code: "LKR",
+    name: "Sri Lankan Rupee",
+    symbol: "Rs",
+    flag: "🇱🇰",
+    decimals: 2,
+  },
 ];
 
 // State
 const selectedCurrency = ref<Currency>(
-  availableCurrencies.find(c => c.code === props.defaultCurrency) ||
-  availableCurrencies[0]
+  availableCurrencies.find((c) => c.code === props.defaultCurrency) ||
+    availableCurrencies[0]
 );
 const exchangeRates = ref<ExchangeRates>({});
 const showDropdown = ref(false);
-const searchQuery = ref('');
+const searchQuery = ref("");
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 const lastUpdate = ref<Date | null>(null);
@@ -159,18 +227,21 @@ const updateTimer = ref<number | null>(null);
 // Computed properties
 const currencies = computed(() => {
   if (props.allowedCurrencies.length > 0) {
-    return availableCurrencies.filter(c => props.allowedCurrencies.includes(c.code));
+    return availableCurrencies.filter((c) =>
+      props.allowedCurrencies.includes(c.code)
+    );
   }
   return availableCurrencies;
 });
 
 const filteredCurrencies = computed(() => {
   if (!searchQuery.value) return currencies.value;
-  
+
   const query = searchQuery.value.toLowerCase();
-  return currencies.value.filter(currency => 
-    currency.code.toLowerCase().includes(query) ||
-    currency.name.toLowerCase().includes(query)
+  return currencies.value.filter(
+    (currency) =>
+      currency.code.toLowerCase().includes(query) ||
+      currency.name.toLowerCase().includes(query)
   );
 });
 
@@ -189,15 +260,15 @@ const formattedPrice = computed(() => {
 
 // Methods
 const formatPrice = (price: number, currencyCode: string): string => {
-  const currency = availableCurrencies.find(c => c.code === currencyCode);
+  const currency = availableCurrencies.find((c) => c.code === currencyCode);
   if (!currency) return price.toFixed(2);
 
   try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currencyCode,
       minimumFractionDigits: currency.decimals,
-      maximumFractionDigits: currency.decimals
+      maximumFractionDigits: currency.decimals,
     }).format(price);
   } catch (e) {
     // Fallback formatting
@@ -208,24 +279,24 @@ const formatPrice = (price: number, currencyCode: string): string => {
 const toggleDropdown = (): void => {
   showDropdown.value = !showDropdown.value;
   if (showDropdown.value) {
-    searchQuery.value = '';
+    searchQuery.value = "";
   }
 };
 
 const selectCurrency = (currency: Currency): void => {
   selectedCurrency.value = currency;
   showDropdown.value = false;
-  searchQuery.value = '';
-  
+  searchQuery.value = "";
+
   // Save to localStorage
-  localStorage.setItem('preferred-currency', currency.code);
-  
-  emit('currency-change', currency.code, convertedPrice.value);
+  localStorage.setItem("preferred-currency", currency.code);
+
+  emit("currency-change", currency.code, convertedPrice.value);
 };
 
 const fetchExchangeRates = async (): Promise<void> => {
   if (isLoading.value) return;
-  
+
   isLoading.value = true;
   error.value = null;
 
@@ -234,12 +305,13 @@ const fetchExchangeRates = async (): Promise<void> => {
     const rates = await fetchRatesWithFallback();
     exchangeRates.value = rates;
     lastUpdate.value = new Date();
-    emit('rate-update', rates);
+    emit("rate-update", rates);
   } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : 'Failed to fetch exchange rates';
+    const errorMessage =
+      e instanceof Error ? e.message : "Failed to fetch exchange rates";
     error.value = errorMessage;
-    emit('error', errorMessage);
-    
+    emit("error", errorMessage);
+
     // Use cached rates if available
     const cachedRates = getCachedRates();
     if (cachedRates) {
@@ -255,7 +327,7 @@ const fetchRatesWithFallback = async (): Promise<ExchangeRates> => {
     () => fetchFromExchangeRateAPI(),
     () => fetchFromFixer(),
     () => fetchFromCurrencyLayer(),
-    () => fetchFromOpenExchangeRates()
+    () => fetchFromOpenExchangeRates(),
   ];
 
   for (const apiFetch of apis) {
@@ -271,60 +343,63 @@ const fetchRatesWithFallback = async (): Promise<ExchangeRates> => {
     }
   }
 
-  throw new Error('All exchange rate APIs failed');
+  throw new Error("All exchange rate APIs failed");
 };
 
 const fetchFromExchangeRateAPI = async (): Promise<ExchangeRates> => {
-  const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${props.baseCurrency}`);
-  if (!response.ok) throw new Error('Exchange Rate API failed');
-  
+  const response = await fetch(
+    `https://api.exchangerate-api.com/v4/latest/${props.baseCurrency}`
+  );
+  if (!response.ok) throw new Error("Exchange Rate API failed");
+
   const data = await response.json();
   return data.rates;
 };
 
 const fetchFromFixer = async (): Promise<ExchangeRates> => {
-  if (!props.apiKey) throw new Error('Fixer API key required');
-  
+  if (!props.apiKey) throw new Error("Fixer API key required");
+
   const response = await fetch(
     `https://api.fixer.io/latest?access_key=${props.apiKey}&base=${props.baseCurrency}`
   );
-  if (!response.ok) throw new Error('Fixer API failed');
-  
+  if (!response.ok) throw new Error("Fixer API failed");
+
   const data = await response.json();
-  if (!data.success) throw new Error(data.error?.info || 'Fixer API error');
-  
+  if (!data.success) throw new Error(data.error?.info || "Fixer API error");
+
   return data.rates;
 };
 
 const fetchFromCurrencyLayer = async (): Promise<ExchangeRates> => {
-  if (!props.apiKey) throw new Error('CurrencyLayer API key required');
-  
+  if (!props.apiKey) throw new Error("CurrencyLayer API key required");
+
   const response = await fetch(
     `https://api.currencylayer.com/live?access_key=${props.apiKey}&source=${props.baseCurrency}`
   );
-  if (!response.ok) throw new Error('CurrencyLayer API failed');
-  
+  if (!response.ok) throw new Error("CurrencyLayer API failed");
+
   const data = await response.json();
-  if (!data.success) throw new Error(data.error?.info || 'CurrencyLayer API error');
-  
+  if (!data.success)
+    throw new Error(data.error?.info || "CurrencyLayer API error");
+
   // Transform quotes to simple rates
   const rates: ExchangeRates = {};
   Object.entries(data.quotes).forEach(([key, value]) => {
     const currency = key.substring(3); // Remove base currency prefix
     rates[currency] = value as number;
   });
-  
+
   return rates;
 };
 
 const fetchFromOpenExchangeRates = async (): Promise<ExchangeRates> => {
-  if (!props.apiKey) throw new Error('Open Exchange Rates API key required');
-  
+  if (!props.apiKey) throw new Error("Open Exchange Rates API key required");
+
   const response = await fetch(
     `https://openexchangerates.org/api/latest.json?app_id=${props.apiKey}&base=${props.baseCurrency}`
   );
-  if (!response.ok) throw new Error('Open Exchange Rates API failed');
-  
+  if (!response.ok) throw new Error("Open Exchange Rates API failed");
+
   const data = await response.json();
   return data.rates;
 };
@@ -334,9 +409,9 @@ const cacheRates = (rates: ExchangeRates): void => {
     const cacheData = {
       rates,
       timestamp: Date.now(),
-      baseCurrency: props.baseCurrency
+      baseCurrency: props.baseCurrency,
     };
-    localStorage.setItem('exchange-rates-cache', JSON.stringify(cacheData));
+    localStorage.setItem("exchange-rates-cache", JSON.stringify(cacheData));
   } catch (e) {
     // Ignore localStorage errors
   }
@@ -344,15 +419,15 @@ const cacheRates = (rates: ExchangeRates): void => {
 
 const getCachedRates = (): ExchangeRates | null => {
   try {
-    const cached = localStorage.getItem('exchange-rates-cache');
+    const cached = localStorage.getItem("exchange-rates-cache");
     if (!cached) return null;
-    
+
     const cacheData = JSON.parse(cached);
     const isExpired = Date.now() - cacheData.timestamp > props.updateInterval;
     const isWrongBase = cacheData.baseCurrency !== props.baseCurrency;
-    
+
     if (isExpired || isWrongBase) return null;
-    
+
     return cacheData.rates;
   } catch (e) {
     return null;
@@ -363,7 +438,7 @@ const setupAutoUpdate = (): void => {
   if (updateTimer.value) {
     clearInterval(updateTimer.value);
   }
-  
+
   updateTimer.value = window.setInterval(() => {
     fetchExchangeRates();
   }, props.updateInterval);
@@ -371,26 +446,34 @@ const setupAutoUpdate = (): void => {
 
 const handleClickOutside = (event: Event): void => {
   const target = event.target as Element;
-  if (!target.closest('.relative')) {
+  if (!target.closest(".relative")) {
     showDropdown.value = false;
   }
 };
 
 // Watchers
-watch(() => props.baseCurrency, () => {
-  fetchExchangeRates();
-});
+watch(
+  () => props.baseCurrency,
+  () => {
+    fetchExchangeRates();
+  }
+);
 
-watch(() => props.basePrice, () => {
-  emit('currency-change', selectedCurrency.value.code, convertedPrice.value);
-});
+watch(
+  () => props.basePrice,
+  () => {
+    emit("currency-change", selectedCurrency.value.code, convertedPrice.value);
+  }
+);
 
 // Lifecycle
 onMounted(async () => {
   // Load preferred currency from localStorage
-  const preferredCurrency = localStorage.getItem('preferred-currency');
+  const preferredCurrency = localStorage.getItem("preferred-currency");
   if (preferredCurrency) {
-    const currency = availableCurrencies.find(c => c.code === preferredCurrency);
+    const currency = availableCurrencies.find(
+      (c) => c.code === preferredCurrency
+    );
     if (currency) {
       selectedCurrency.value = currency;
     }
@@ -401,30 +484,30 @@ onMounted(async () => {
   if (cachedRates) {
     exchangeRates.value = cachedRates;
   }
-  
+
   await fetchExchangeRates();
   setupAutoUpdate();
-  
+
   // Add click outside listener
-  document.addEventListener('click', handleClickOutside);
+  document.addEventListener("click", handleClickOutside);
 });
 
 onUnmounted(() => {
   if (updateTimer.value) {
     clearInterval(updateTimer.value);
   }
-  document.removeEventListener('click', handleClickOutside);
+  document.removeEventListener("click", handleClickOutside);
 });
 
 // Expose methods for parent components
 defineExpose({
   refreshRates: fetchExchangeRates,
   setCurrency: (code: string) => {
-    const currency = availableCurrencies.find(c => c.code === code);
+    const currency = availableCurrencies.find((c) => c.code === code);
     if (currency) selectCurrency(currency);
   },
   getCurrentRate: () => exchangeRate.value,
-  getLastUpdate: () => lastUpdate.value
+  getLastUpdate: () => lastUpdate.value,
 });
 </script>
 

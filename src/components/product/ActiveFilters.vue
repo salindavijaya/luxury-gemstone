@@ -129,9 +129,9 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, computed } from 'vue'
-  import { useFilters } from '@/composables/useFilters'
-  import FilterTag from './FilterTag.vue'
+  import { ref, computed } from 'vue';
+  import { useFilters } from '@/composables/useFilters';
+  import FilterTag from './FilterTag.vue';
   
   // Props
   interface Props {

@@ -1,417 +1,428 @@
-import { ref, reactive, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCart } from './useCart'
+import { ref, reactive, computed, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useCart } from "./useCart";
 
-interface Address {
-  firstName: string
-  lastName: string
-  company?: string
-  address1: string
-  address2?: string
-  city: string
-  state: string
-  postalCode: string
-  country: string
-  phone?: string
+import type {
+  Address,
+  ShippingOption,
+  PaymentMethod,
+  ShippingDetails,
+  BillingDetails,
+  PaymentDetails,
+  CheckoutData,
+} from "@/types/checkout";
+
+interface CustomerData {
+  email: string;
+  isGuest: boolean;
+  createAccount?: boolean;
+  password?: string;
 }
 
-interface ShippingOption {
-  id: string
-  name: string
-  price: number
-  deliveryTime: string
-  description: string
+interface BillingData extends BillingDetails {
+  isBusinessPurchase: boolean;
+  taxId?: string;
+  companyName?: string;
 }
 
-interface PaymentMethod {
-  id: string
-  type: 'card' | 'paypal' | 'apple_pay' | 'google_pay'
-  name: string
-  details?: any
+interface ExtendedCheckoutData extends Omit<CheckoutData, "billing"> {
+  customer: CustomerData;
+  billing: BillingData;
+  instructions?: string;
+  orderNotes?: string;
+  giftMessage?: string;
+  marketingConsent: boolean;
+  termsAccepted: boolean;
 }
 
-interface BillingData {
-  address: Address | null
-  sameAsShipping: boolean
-  isBusinessPurchase: boolean
-  taxId?: string
-  companyName?: string
-}
-
-interface CheckoutData {
-  customer: {
-    email: string
-    isGuest: boolean
-    createAccount?: boolean
-    password?: string
-  }
-  shipping: {
-    address: Address | null
-    option: ShippingOption | null
-    instructions?: string
-  }
-  billing: BillingData
-  payment: {
-    method: PaymentMethod | null
-    cardData?: any
-  }
-  orderNotes?: string
-  giftMessage?: string
-  marketingConsent: boolean
-  termsAccepted: boolean
-}
-
-export type CheckoutStep = 'shipping' | 'payment' | 'review'
+export type CheckoutStep = "shipping" | "payment" | "review";
 
 /**
  * Composable for checkout process management
  * Handles multi-step checkout flow and data persistence
  */
 export function useCheckout() {
-  const router = useRouter()
-  const { total, items, validateCartForCheckout } = useCart()
+  const router = useRouter();
+  const cart = useCart();
+  const cartItems = computed(() => cart.cartItems.value);
+  const cartTotal = computed(() => cart.total.value);
+
+  const validateCartForCheckout = () => ({
+    valid: cartItems.value.length > 0,
+    errors: cartItems.value.length === 0 ? ["Cart is empty"] : [],
+  });
 
   // Checkout state
-  const currentStep = ref<CheckoutStep>('shipping')
-  const isProcessing = ref(false)
-  const error = ref<string | null>(null)
-  const completedSteps = ref<Set<CheckoutStep>>(new Set())
+  const currentStep = ref<CheckoutStep>("shipping");
+  const isProcessing = ref(false);
+  const error = ref<string | null>(null);
+  const completedSteps = ref<Set<CheckoutStep>>(new Set());
+
+  // Initial empty address
+  const emptyAddress: Address = {
+    firstName: "",
+    lastName: "",
+    address1: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "",
+  };
+
+  // Initial shipping method
+  const defaultShipping: ShippingOption = {
+    id: "standard",
+    name: "Standard Shipping",
+    price: 0,
+    duration: "5-7 business days",
+    description: "Standard shipping option",
+  };
+
+  // Initial payment method
+  const defaultPayment: PaymentMethod = {
+    type: "card",
+    name: "Credit Card",
+    details: {},
+  };
 
   // Checkout data
-  const checkoutData = reactive<CheckoutData>({
+  const checkoutData = reactive<ExtendedCheckoutData>({
     customer: {
-      email: '',
+      email: "",
       isGuest: true,
       createAccount: false,
-      password: ''
+      password: "",
     },
     shipping: {
-      address: null,
-      option: null,
-      instructions: ''
+      address: emptyAddress,
+      method: defaultShipping,
+      cost: 0,
     },
     billing: {
-      address: null,
+      address: emptyAddress,
       sameAsShipping: true,
       isBusinessPurchase: false,
-      taxId: '',
-      companyName: ''
     },
     payment: {
-      method: null,
-      cardData: null
+      method: defaultPayment,
+      amount: 0,
+      status: "pending",
     },
-    orderNotes: '',
-    giftMessage: '',
+    items: [],
+    subtotal: 0,
+    tax: 0,
+    total: 0,
+    instructions: "",
+    orderNotes: "",
+    giftMessage: "",
     marketingConsent: false,
-    termsAccepted: false
-  })
+    termsAccepted: false,
+  });
 
   // Validation errors for each step
   const validationErrors = ref<Record<string, Record<string, string>>>({
     shipping: {},
     payment: {},
-    review: {}
-  })
+    review: {},
+  });
 
   // Computed properties
   const canProceedToPayment = computed(() => {
     return (
       checkoutData.customer.email &&
       checkoutData.shipping.address &&
-      checkoutData.shipping.option &&
-      completedSteps.value.has('shipping')
-    )
-  })
+      checkoutData.shipping.method &&
+      completedSteps.value.has("shipping")
+    );
+  });
 
   const canProceedToReview = computed(() => {
     return (
       canProceedToPayment.value &&
-      checkoutData.billing.address &&
+      (checkoutData.billing.sameAsShipping || checkoutData.billing.address) &&
       checkoutData.payment.method &&
-      completedSteps.value.has('payment')
-    )
-  })
+      completedSteps.value.has("payment")
+    );
+  });
 
   const canCompleteOrder = computed(() => {
     return (
       canProceedToReview.value &&
       checkoutData.termsAccepted &&
-      completedSteps.value.has('review')
-    )
-  })
+      completedSteps.value.has("review")
+    );
+  });
 
   const orderSummary = computed(() => {
-    const subtotal = total.value
-    const shippingCost = checkoutData.shipping.option?.price || 0
-    const taxRate = calculateTaxRate()
-    const taxAmount = subtotal * taxRate
-    const finalTotal = subtotal + shippingCost + taxAmount
+    const subtotal = cartTotal.value;
+    const shippingCost = checkoutData.shipping.method?.price || 0;
+    const taxRate = calculateTaxRate();
+    const taxAmount = subtotal * taxRate;
+    const finalTotal = subtotal + shippingCost + taxAmount;
 
     return {
       subtotal,
       shipping: shippingCost,
       tax: taxAmount,
       total: finalTotal,
-      itemCount: items.value.length
-    }
-  })
+      itemCount: cartItems.value.length,
+    };
+  });
 
   // Step navigation
   const goToStep = (step: CheckoutStep) => {
-    clearError()
-    
+    clearError();
+
     switch (step) {
-      case 'payment':
+      case "payment":
         if (!canProceedToPayment.value) {
-          error.value = 'Please complete shipping information first'
-          return false
+          error.value = "Please complete shipping information first";
+          return false;
         }
-        break
-      case 'review':
+        break;
+      case "review":
         if (!canProceedToReview.value) {
-          error.value = 'Please complete payment information first'
-          return false
+          error.value = "Please complete payment information first";
+          return false;
         }
-        break
+        break;
     }
-    
-    currentStep.value = step
-    return true
-  }
+
+    currentStep.value = step;
+    return true;
+  };
 
   const nextStep = () => {
     switch (currentStep.value) {
-      case 'shipping':
+      case "shipping":
         if (validateShippingStep()) {
-          completedSteps.value.add('shipping')
-          return goToStep('payment')
+          completedSteps.value.add("shipping");
+          return goToStep("payment");
         }
-        break
-      case 'payment':
+        break;
+      case "payment":
         if (validatePaymentStep()) {
-          completedSteps.value.add('payment')
-          return goToStep('review')
+          completedSteps.value.add("payment");
+          return goToStep("review");
         }
-        break
-      case 'review':
+        break;
+      case "review":
         if (validateReviewStep()) {
-          completedSteps.value.add('review')
-          return processOrder()
+          completedSteps.value.add("review");
+          return processOrder();
         }
-        break
+        break;
     }
-    return false
-  }
+    return false;
+  };
 
   const previousStep = () => {
     switch (currentStep.value) {
-      case 'payment':
-        return goToStep('shipping')
-      case 'review':
-        return goToStep('payment')
+      case "payment":
+        return goToStep("shipping");
+      case "review":
+        return goToStep("payment");
       default:
-        return false
+        return false;
     }
-  }
+  };
 
   // Validation functions
   const validateShippingStep = (): boolean => {
-    const errors: Record<string, string> = {}
-    
+    const errors: Record<string, string> = {};
+
     if (!checkoutData.customer.email) {
-      errors.email = 'Email is required'
+      errors.email = "Email is required";
     } else if (!isValidEmail(checkoutData.customer.email)) {
-      errors.email = 'Please enter a valid email address'
+      errors.email = "Please enter a valid email address";
     }
-    
+
     if (!checkoutData.shipping.address) {
-      errors.address = 'Shipping address is required'
+      errors.address = "Shipping address is required";
     } else {
-      const addr = checkoutData.shipping.address
-      if (!addr.firstName) errors.firstName = 'First name is required'
-      if (!addr.lastName) errors.lastName = 'Last name is required'
-      if (!addr.address1) errors.address1 = 'Address is required'
-      if (!addr.city) errors.city = 'City is required'
-      if (!addr.state) errors.state = 'State is required'
-      if (!addr.postalCode) errors.postalCode = 'Postal code is required'
-      if (!addr.country) errors.country = 'Country is required'
+      const addr = checkoutData.shipping.address;
+      if (!addr.firstName) errors.firstName = "First name is required";
+      if (!addr.lastName) errors.lastName = "Last name is required";
+      if (!addr.address1) errors.address1 = "Address is required";
+      if (!addr.city) errors.city = "City is required";
+      if (!addr.state) errors.state = "State is required";
+      if (!addr.postalCode) errors.postalCode = "Postal code is required";
+      if (!addr.country) errors.country = "Country is required";
     }
-    
-    if (!checkoutData.shipping.option) {
-      errors.shippingOption = 'Please select a shipping option'
+
+    if (!checkoutData.shipping.method) {
+      errors.shippingMethod = "Please select a shipping method";
     }
-    
-    validationErrors.value.shipping = errors
-    return Object.keys(errors).length === 0
-  }
+
+    validationErrors.value.shipping = errors;
+    return Object.keys(errors).length === 0;
+  };
 
   const validatePaymentStep = (): boolean => {
-    const errors: Record<string, string> = {}
-    
+    const errors: Record<string, string> = {};
+
     if (!checkoutData.payment.method) {
-      errors.paymentMethod = 'Please select a payment method'
+      errors.paymentMethod = "Please select a payment method";
     }
-    
+
     if (!checkoutData.billing.address && !checkoutData.billing.sameAsShipping) {
-      errors.billingAddress = 'Billing address is required'
+      errors.billingAddress = "Billing address is required";
     }
-    
-    if (checkoutData.billing.isBusinessPurchase) {
-      if (!checkoutData.billing.taxId) {
-        errors.taxId = 'Tax ID is required for business purchases'
-      }
-      if (!checkoutData.billing.companyName) {
-        errors.companyName = 'Company name is required for business purchases'
-      }
-    }
-    
-    validationErrors.value.payment = errors
-    return Object.keys(errors).length === 0
-  }
+
+    validationErrors.value.payment = errors;
+    return Object.keys(errors).length === 0;
+  };
 
   const validateReviewStep = (): boolean => {
-    const errors: Record<string, string> = {}
-    
+    const errors: Record<string, string> = {};
+
     if (!checkoutData.termsAccepted) {
-      errors.terms = 'You must accept the terms and conditions'
+      errors.terms = "You must accept the terms and conditions";
     }
-    
-    const cartValidation = validateCartForCheckout()
+
+    const cartValidation = validateCartForCheckout();
     if (!cartValidation.valid) {
-      errors.cart = cartValidation.errors.join(', ')
+      errors.cart = cartValidation.errors.join(", ");
     }
-    
-    validationErrors.value.review = errors
-    return Object.keys(errors).length === 0
-  }
+
+    validationErrors.value.review = errors;
+    return Object.keys(errors).length === 0;
+  };
 
   // Order processing
   const processOrder = async () => {
-    isProcessing.value = true
-    error.value = null
-    
+    isProcessing.value = true;
+    error.value = null;
+
     try {
       // Simulate order processing
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Mock order creation
-      const orderId = generateOrderId()
-      
+      const orderId = generateOrderId();
+
       // Store order data (in real app, this would be an API call)
-      const orderData = {
-        id: orderId,
-        items: items.value,
-        customer: checkoutData.customer,
-        shipping: checkoutData.shipping,
-        billing: checkoutData.billing,
-        payment: checkoutData.payment,
-        summary: orderSummary.value,
-        orderNotes: checkoutData.orderNotes,
-        giftMessage: checkoutData.giftMessage,
-        createdAt: new Date().toISOString(),
-        status: 'confirmed'
-      }
-      
+      // Save the order with current state
+      checkoutData.items = cartItems.value.map((item) => ({
+        id: item.id,
+        productId: item.product.id,
+        name: item.product.name,
+        price: item.salePrice || item.product.price,
+        quantity: item.quantity,
+        image: item.product.image || "",
+        options: item.options,
+      }));
+      checkoutData.subtotal = orderSummary.value.subtotal;
+      checkoutData.tax = orderSummary.value.tax;
+      checkoutData.total = orderSummary.value.total;
+      checkoutData.shipping.cost = orderSummary.value.shipping;
+
       // Clear sensitive payment data
-      clearPaymentData()
-      
+      if (checkoutData.payment.method?.details) {
+        // Create a copy without sensitive data
+        checkoutData.payment.method = {
+          ...checkoutData.payment.method,
+          details: {}, // Clear sensitive details after processing
+        };
+      }
+
       // Navigate to success page
-      router.push(`/checkout/success/${orderId}`)
-      
-      return orderId
+      router.push(`/checkout/success/${orderId}`);
+
+      return orderId;
     } catch (err) {
-      error.value = 'Failed to process order. Please try again.'
-      throw err
+      error.value = "Failed to process order. Please try again.";
+      throw err;
     } finally {
-      isProcessing.value = false
+      isProcessing.value = false;
     }
-  }
+  };
 
   // Utility functions
   const calculateTaxRate = (): number => {
-    const address = checkoutData.billing.sameAsShipping 
-      ? checkoutData.shipping.address 
-      : checkoutData.billing.address
-    
-    if (!address?.state) return 0
-    
+    const address = checkoutData.billing.sameAsShipping
+      ? checkoutData.shipping.address
+      : checkoutData.billing.address;
+
+    if (!address?.state) return 0;
+
     // Mock tax rates by state
     const taxRates: Record<string, number> = {
-      'CA': 0.0875,
-      'NY': 0.08,
-      'TX': 0.0625,
-      'FL': 0.06,
-      'WA': 0.065,
-      'OR': 0.0,
-      'NH': 0.0,
-      'MT': 0.0,
-      'DE': 0.0
-    }
-    
-    return taxRates[address.state] || 0.05
-  }
+      CA: 0.0875,
+      NY: 0.08,
+      TX: 0.0625,
+      FL: 0.06,
+      WA: 0.065,
+      OR: 0.0,
+      NH: 0.0,
+      MT: 0.0,
+      DE: 0.0,
+    };
+
+    return taxRates[address.state] || 0.05;
+  };
 
   const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const generateOrderId = (): string => {
-    const timestamp = Date.now().toString(36)
-    const randomStr = Math.random().toString(36).substring(2, 8)
-    return `GEM-${timestamp}-${randomStr}`.toUpperCase()
-  }
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    return `GEM-${timestamp}-${randomStr}`.toUpperCase();
+  };
 
   const clearError = () => {
-    error.value = null
-  }
-
-  const clearPaymentData = () => {
-    if (checkoutData.payment.cardData) {
-      delete checkoutData.payment.cardData
-    }
-  }
+    error.value = null;
+  };
 
   // Data persistence (localStorage)
   const saveCheckoutData = () => {
     try {
-      const dataToSave = { ...checkoutData }
-      // Remove sensitive payment data before saving
-      if (dataToSave.payment.cardData) {
-        delete dataToSave.payment.cardData
-      }
-      localStorage.setItem('checkout-data', JSON.stringify(dataToSave))
+      const dataToSave = {
+        ...checkoutData,
+        payment: {
+          ...checkoutData.payment,
+          method: checkoutData.payment.method
+            ? {
+                ...checkoutData.payment.method,
+                details: {}, // Don't save sensitive card details
+              }
+            : null,
+        },
+      };
+      localStorage.setItem("checkout-data", JSON.stringify(dataToSave));
     } catch (err) {
-      console.warn('Failed to save checkout data:', err)
+      console.warn("Failed to save checkout data:", err);
     }
-  }
+  };
 
   const loadCheckoutData = () => {
     try {
-      const saved = localStorage.getItem('checkout-data')
+      const saved = localStorage.getItem("checkout-data");
       if (saved) {
-        const data = JSON.parse(saved)
-        Object.assign(checkoutData, data)
+        const data = JSON.parse(saved);
+        Object.assign(checkoutData, data);
       }
     } catch (err) {
-      console.warn('Failed to load checkout data:', err)
+      console.warn("Failed to load checkout data:", err);
     }
-  }
+  };
 
   const clearCheckoutData = () => {
     try {
-      localStorage.removeItem('checkout-data')
+      localStorage.removeItem("checkout-data");
     } catch (err) {
-      console.warn('Failed to clear checkout data:', err)
+      console.warn("Failed to clear checkout data:", err);
     }
-  }
+  };
 
   // Auto-save checkout data
-  watch(checkoutData, saveCheckoutData, { deep: true })
+  watch(checkoutData, saveCheckoutData, { deep: true });
 
   // Load saved data on initialization
-  loadCheckoutData()
+  loadCheckoutData();
 
   return {
     // State
@@ -421,32 +432,32 @@ export function useCheckout() {
     completedSteps,
     checkoutData,
     validationErrors,
-    
+
     // Computed
     canProceedToPayment,
     canProceedToReview,
     canCompleteOrder,
     orderSummary,
-    
+
     // Navigation
     goToStep,
     nextStep,
     previousStep,
-    
+
     // Validation
     validateShippingStep,
     validatePaymentStep,
     validateReviewStep,
-    
+
     // Processing
     processOrder,
-    
+
     // Utilities
     calculateTaxRate,
     isValidEmail,
     clearError,
     saveCheckoutData,
     loadCheckoutData,
-    clearCheckoutData
-  }
+    clearCheckoutData,
+  };
 }

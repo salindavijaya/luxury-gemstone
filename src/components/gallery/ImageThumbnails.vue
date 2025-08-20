@@ -1,5 +1,4 @@
-### components/gallery/ImageThumbnails.vue
-```vue
+### components/gallery/ImageThumbnails.vue ```vue
 <template>
   <div class="flex space-x-2 overflow-x-auto pb-2">
     <button
@@ -7,7 +6,11 @@
       :key="image.id"
       @click="selectImage(index)"
       class="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all hover:scale-105"
-      :class="index === currentIndex ? 'border-emerald-500 shadow-lg' : 'border-slate-200 hover:border-slate-300'"
+      :class="
+        index === currentIndex
+          ? 'border-emerald-500 shadow-lg'
+          : 'border-slate-200 hover:border-slate-300'
+      "
       :aria-label="`View image ${index + 1}`"
     >
       <img
@@ -23,24 +26,24 @@
 
 <script setup lang="ts">
 interface Image {
-  id: string
-  url: string
-  thumbnailUrl: string
-  alt?: string
+  id: string;
+  url: string;
+  thumbnailUrl: string;
+  alt?: string;
 }
 
 interface Props {
-  images: Image[]
-  currentIndex: number
+  images: Image[];
+  currentIndex: number;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 
 const emit = defineEmits<{
-  select: [index: number]
-}>()
+  select: [index: number];
+}>();
 
 const selectImage = (index: number) => {
-  emit('select', index)
-}
+  emit("select", index);
+};
 </script>

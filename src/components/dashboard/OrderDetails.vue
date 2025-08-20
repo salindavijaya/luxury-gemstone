@@ -4,7 +4,9 @@
     <div class="space-y-6">
       <!-- Order Header -->
       <div class="bg-slate-50 rounded-lg p-6">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div
+          class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+        >
           <div>
             <h2 class="text-2xl font-bold text-slate-900 mb-2">
               Order #{{ order.orderNumber }}
@@ -19,10 +21,12 @@
             </div>
           </div>
           <div class="flex items-center space-x-3">
-            <span :class="[
-              'inline-flex px-3 py-2 text-sm font-medium rounded-lg',
-              getStatusClasses(order.status)
-            ]">
+            <span
+              :class="[
+                'inline-flex px-3 py-2 text-sm font-medium rounded-lg',
+                getStatusClasses(order.status),
+              ]"
+            >
               {{ getStatusText(order.status) }}
             </span>
             <button
@@ -38,8 +42,13 @@
       </div>
 
       <!-- Order Tracking -->
-      <div v-if="order.tracking" class="bg-white rounded-lg border border-slate-200 p-6">
-        <h3 class="text-lg font-semibold text-slate-900 mb-4">Order Tracking</h3>
+      <div
+        v-if="order.tracking"
+        class="bg-white rounded-lg border border-slate-200 p-6"
+      >
+        <h3 class="text-lg font-semibold text-slate-900 mb-4">
+          Order Tracking
+        </h3>
         <OrderTracker :order="order" />
       </div>
 
@@ -59,12 +68,17 @@
                 :src="item.image"
                 :alt="item.name"
                 class="w-24 h-24 rounded-lg object-cover"
-              >
+              />
               <div class="flex-1">
-                <h4 class="text-lg font-medium text-slate-900 mb-2">{{ item.name }}</h4>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600 mb-3">
+                <h4 class="text-lg font-medium text-slate-900 mb-2">
+                  {{ item.name }}
+                </h4>
+                <div
+                  class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600 mb-3"
+                >
                   <div>
-                    <span class="font-medium">Type:</span> {{ item.gemstoneType }}
+                    <span class="font-medium">Type:</span>
+                    {{ item.gemstoneType }}
                   </div>
                   <div>
                     <span class="font-medium">Weight:</span> {{ item.weight }}ct
@@ -103,19 +117,27 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Shipping Address -->
         <div class="bg-white rounded-lg border border-slate-200 p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+          <h3
+            class="text-lg font-semibold text-slate-900 mb-4 flex items-center"
+          >
             <TruckIcon class="w-5 h-5 mr-2" />
             Shipping Address
           </h3>
           <div class="text-sm text-slate-600 space-y-1">
             <p class="font-medium text-slate-900">
-              {{ order.shippingAddress.firstName }} {{ order.shippingAddress.lastName }}
+              {{ order.shippingAddress.firstName }}
+              {{ order.shippingAddress.lastName }}
             </p>
-            <p v-if="order.shippingAddress.company">{{ order.shippingAddress.company }}</p>
+            <p v-if="order.shippingAddress.company">
+              {{ order.shippingAddress.company }}
+            </p>
             <p>{{ order.shippingAddress.address1 }}</p>
-            <p v-if="order.shippingAddress.address2">{{ order.shippingAddress.address2 }}</p>
+            <p v-if="order.shippingAddress.address2">
+              {{ order.shippingAddress.address2 }}
+            </p>
             <p>
-              {{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} 
+              {{ order.shippingAddress.city }},
+              {{ order.shippingAddress.state }}
               {{ order.shippingAddress.postalCode }}
             </p>
             <p>{{ order.shippingAddress.country }}</p>
@@ -124,19 +146,26 @@
 
         <!-- Billing Address -->
         <div class="bg-white rounded-lg border border-slate-200 p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+          <h3
+            class="text-lg font-semibold text-slate-900 mb-4 flex items-center"
+          >
             <CreditCardIcon class="w-5 h-5 mr-2" />
             Billing Address
           </h3>
           <div class="text-sm text-slate-600 space-y-1">
             <p class="font-medium text-slate-900">
-              {{ order.billingAddress.firstName }} {{ order.billingAddress.lastName }}
+              {{ order.billingAddress.firstName }}
+              {{ order.billingAddress.lastName }}
             </p>
-            <p v-if="order.billingAddress.company">{{ order.billingAddress.company }}</p>
+            <p v-if="order.billingAddress.company">
+              {{ order.billingAddress.company }}
+            </p>
             <p>{{ order.billingAddress.address1 }}</p>
-            <p v-if="order.billingAddress.address2">{{ order.billingAddress.address2 }}</p>
+            <p v-if="order.billingAddress.address2">
+              {{ order.billingAddress.address2 }}
+            </p>
             <p>
-              {{ order.billingAddress.city }}, {{ order.billingAddress.state }} 
+              {{ order.billingAddress.city }}, {{ order.billingAddress.state }}
               {{ order.billingAddress.postalCode }}
             </p>
             <p>{{ order.billingAddress.country }}</p>
@@ -171,28 +200,24 @@
     </div>
 
     <!-- Invoice Modal -->
-    <Modal
-      v-model="showInvoice"
-      title="Order Invoice"
-      size="lg"
-    >
+    <Modal v-model="showInvoice" title="Order Invoice" size="lg">
       <OrderInvoice :order="order" @close="showInvoice = false" />
     </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { 
-  TruckIcon, 
-  CreditCardIcon, 
-  PrinterIcon, 
-  ShieldCheckIcon 
-} from 'lucide-vue-next';
-import type { Order } from '@/types';
-import OrderTracker from './OrderTracker.vue';
-import OrderInvoice from './OrderInvoice.vue';
-import Modal from './Modal.vue';
+import { ref } from "vue";
+import {
+  TruckIcon,
+  CreditCardIcon,
+  PrinterIcon,
+  ShieldCheckIcon,
+} from "lucide-vue-next";
+import type { Order } from "@/types";
+import OrderTracker from "./OrderTrack.vue";
+import OrderInvoice from "./OrderInvoice.vue";
+import Modal from "../UI/Modal.vue";
 
 interface Props {
   order: Order;
@@ -206,46 +231,46 @@ defineEmits<{
 const showInvoice = ref(false);
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
 const getStatusClasses = (status: string) => {
   switch (status) {
-    case 'delivered':
-      return 'bg-emerald-100 text-emerald-800';
-    case 'shipped':
-      return 'bg-blue-100 text-blue-800';
-    case 'confirmed':
-      return 'bg-amber-100 text-amber-800';
-    case 'pending':
-      return 'bg-slate-100 text-slate-800';
-    case 'cancelled':
-      return 'bg-red-100 text-red-800';
+    case "delivered":
+      return "bg-emerald-100 text-emerald-800";
+    case "shipped":
+      return "bg-blue-100 text-blue-800";
+    case "confirmed":
+      return "bg-amber-100 text-amber-800";
+    case "pending":
+      return "bg-slate-100 text-slate-800";
+    case "cancelled":
+      return "bg-red-100 text-red-800";
     default:
-      return 'bg-slate-100 text-slate-800';
+      return "bg-slate-100 text-slate-800";
   }
 };
 
 const getStatusText = (status: string) => {
   switch (status) {
-    case 'delivered':
-      return 'Delivered';
-    case 'shipped':
-      return 'Shipped';
-    case 'confirmed':
-      return 'Confirmed';
-    case 'pending':
-      return 'Pending';
-    case 'cancelled':
-      return 'Cancelled';
+    case "delivered":
+      return "Delivered";
+    case "shipped":
+      return "Shipped";
+    case "confirmed":
+      return "Confirmed";
+    case "pending":
+      return "Pending";
+    case "cancelled":
+      return "Cancelled";
     default:
-      return 'Unknown';
+      return "Unknown";
   }
 };
 </script>

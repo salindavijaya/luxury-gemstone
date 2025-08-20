@@ -32,8 +32,18 @@
             </p>
           </div>
           <div v-else class="text-center">
-            <svg class="w-8 h-8 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            <svg
+              class="w-8 h-8 text-slate-400 mx-auto mb-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              ></path>
             </svg>
             <p class="text-sm text-slate-600">Add Product {{ slot }}</p>
           </div>
@@ -43,13 +53,27 @@
 
     <!-- Empty State -->
     <div v-if="comparisonItems.length === 0" class="text-center py-12">
-      <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+      <div
+        class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4"
+      >
+        <svg
+          class="w-8 h-8 text-slate-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          ></path>
         </svg>
       </div>
       <h3 class="text-lg font-medium text-slate-800 mb-2">Compare Products</h3>
-      <p class="text-slate-600 mb-4">Add up to 3 products to compare their features side by side.</p>
+      <p class="text-slate-600 mb-4">
+        Add up to 3 products to compare their features side by side.
+      </p>
     </div>
 
     <!-- Comparison Table -->
@@ -57,7 +81,9 @@
       <table class="w-full">
         <thead>
           <tr class="border-b border-slate-200">
-            <th class="text-left py-4 px-2 font-medium text-slate-800 w-40">Features</th>
+            <th class="text-left py-4 px-2 font-medium text-slate-800 w-40">
+              Features
+            </th>
             <th
               v-for="(item, index) in comparisonItems"
               :key="item.id"
@@ -67,8 +93,18 @@
                 @click="removeProduct(index)"
                 class="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
                 </svg>
               </button>
               <img
@@ -76,7 +112,9 @@
                 :alt="item.name"
                 class="w-20 h-20 object-cover rounded-lg mx-auto mb-2"
               />
-              <h3 class="font-medium text-slate-800 text-sm line-clamp-2">{{ item.name }}</h3>
+              <h3 class="font-medium text-slate-800 text-sm line-clamp-2">
+                {{ item.name }}
+              </h3>
             </th>
           </tr>
         </thead>
@@ -175,11 +213,13 @@
             >
               <span
                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                :class="item.inStock 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-red-100 text-red-800'"
+                :class="
+                  item.inStock
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                "
               >
-                {{ item.inStock ? 'In Stock' : 'Out of Stock' }}
+                {{ item.inStock ? "In Stock" : "Out of Stock" }}
               </span>
             </td>
           </tr>
@@ -207,7 +247,9 @@
       title="Select Product to Compare"
       size="lg"
     >
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto"
+      >
         <div
           v-for="product in availableProducts"
           :key="product.id"
@@ -219,9 +261,13 @@
             :alt="product.name"
             class="w-full h-32 object-cover rounded-md mb-3"
           />
-          <h3 class="font-medium text-slate-800 mb-1 line-clamp-2">{{ product.name }}</h3>
+          <h3 class="font-medium text-slate-800 mb-1 line-clamp-2">
+            {{ product.name }}
+          </h3>
           <p class="text-sm text-slate-600 mb-2">{{ product.category }}</p>
-          <p class="font-semibold text-emerald-600">${{ product.price.toLocaleString() }}</p>
+          <p class="font-semibold text-emerald-600">
+            ${{ product.price.toLocaleString() }}
+          </p>
         </div>
       </div>
     </Modal>
@@ -229,153 +275,161 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useCartStore } from '@/stores/cart'
-import Modal from './Modal.vue'
-import type { Product } from '@/types'
+import { ref, computed } from "vue";
+import { useCartStore } from "@/stores/cart";
+import Modal from "../UI/Modal.vue";
+import type { Product } from "@/types";
 
 // Props
 interface Props {
-  initialProducts?: Product[]
+  initialProducts?: Product[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  initialProducts: () => []
-})
+  initialProducts: () => [],
+});
 
 // Stores
-const cartStore = useCartStore()
+const cartStore = useCartStore();
 
 // State
-const comparisonItems = ref<Product[]>(props.initialProducts)
-const showProductSelector = ref(false)
-const selectedSlot = ref<number>(0)
+const comparisonItems = ref<Product[]>(props.initialProducts);
+const showProductSelector = ref(false);
+const selectedSlot = ref<number>(0);
 
 // Mock available products
 const availableProducts = ref<Product[]>([
   {
-    id: '1',
-    name: 'Royal Blue Sapphire Ring',
-    category: 'Sapphire',
+    id: "1",
+    name: "Royal Blue Sapphire Ring",
+    category: "Sapphire",
     price: 12500,
-    image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400',
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400",
     inStock: true,
-    description: 'Exquisite royal blue sapphire with exceptional clarity',
-    images: ['https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400'],
+    description: "Exquisite royal blue sapphire with exceptional clarity",
+    images: [
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400",
+    ],
     specs: {
       carat: 3.2,
-      cut: 'Oval',
-      color: 'Royal Blue',
-      clarity: 'VVS1',
-      certification: 'GIA'
+      cut: "Oval",
+      color: "Royal Blue",
+      clarity: "VVS1",
+      certification: "GIA",
     },
-    collection: 'Royal Collection'
+    collection: "Royal Collection",
   },
   {
-    id: '2',
-    name: 'Emerald Cut Diamond Necklace',
-    category: 'Diamond',
+    id: "2",
+    name: "Emerald Cut Diamond Necklace",
+    category: "Diamond",
     price: 25000,
-    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400',
+    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400",
     inStock: true,
-    description: 'Elegant emerald cut diamond necklace',
-    images: ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400'],
+    description: "Elegant emerald cut diamond necklace",
+    images: [
+      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400",
+    ],
     specs: {
       carat: 5.0,
-      cut: 'Emerald',
-      color: 'D',
-      clarity: 'FL',
-      certification: 'GIA'
+      cut: "Emerald",
+      color: "D",
+      clarity: "FL",
+      certification: "GIA",
     },
-    collection: 'Diamond Collection'
+    collection: "Diamond Collection",
   },
   {
-    id: '3',
-    name: 'Vintage Ruby Earrings',
-    category: 'Ruby',
+    id: "3",
+    name: "Vintage Ruby Earrings",
+    category: "Ruby",
     price: 8500,
-    image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400',
+    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400",
     inStock: false,
-    description: 'Vintage-inspired ruby earrings with intricate details',
-    images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400'],
+    description: "Vintage-inspired ruby earrings with intricate details",
+    images: [
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400",
+    ],
     specs: {
       carat: 2.1,
-      cut: 'Round',
-      color: 'Pigeon Blood Red',
-      clarity: 'VS1',
-      certification: 'GRS'
+      cut: "Round",
+      color: "Pigeon Blood Red",
+      clarity: "VS1",
+      certification: "GRS",
     },
-    collection: 'Vintage Collection'
+    collection: "Vintage Collection",
   },
   {
-    id: '4',
-    name: 'Tanzanite Pendant',
-    category: 'Tanzanite',
+    id: "4",
+    name: "Tanzanite Pendant",
+    category: "Tanzanite",
     price: 6200,
-    image: 'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400',
+    image: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400",
     inStock: true,
-    description: 'Rare tanzanite pendant with white gold setting',
-    images: ['https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400'],
+    description: "Rare tanzanite pendant with white gold setting",
+    images: [
+      "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=400",
+    ],
     specs: {
       carat: 4.5,
-      cut: 'Cushion',
-      color: 'Vivid Blue',
-      clarity: 'VS2',
-      certification: 'GIA'
+      cut: "Cushion",
+      color: "Vivid Blue",
+      clarity: "VS2",
+      certification: "GIA",
     },
-    collection: 'Exotic Collection'
+    collection: "Exotic Collection",
   },
   {
-    id: '5',
-    name: 'Pink Diamond Solitaire',
-    category: 'Diamond',
+    id: "5",
+    name: "Pink Diamond Solitaire",
+    category: "Diamond",
     price: 45000,
-    image: 'https://images.unsplash.com/photo-1588444837495-c6cfeb53ff5d?w=400',
+    image: "https://images.unsplash.com/photo-1588444837495-c6cfeb53ff5d?w=400",
     inStock: true,
-    description: 'Rare pink diamond in platinum setting',
-    images: ['https://images.unsplash.com/photo-1588444837495-c6cfeb53ff5d?w=400'],
+    description: "Rare pink diamond in platinum setting",
+    images: [
+      "https://images.unsplash.com/photo-1588444837495-c6cfeb53ff5d?w=400",
+    ],
     specs: {
       carat: 2.8,
-      cut: 'Round',
-      color: 'Fancy Pink',
-      clarity: 'VS1',
-      certification: 'GIA'
+      cut: "Round",
+      color: "Fancy Pink",
+      clarity: "VS1",
+      certification: "GIA",
     },
-    collection: 'Rare Collection'
-  }
-])
+    collection: "Rare Collection",
+  },
+]);
 
 // Computed
 const filteredProducts = computed(() => {
-  return availableProducts.value.filter(product => 
-    !comparisonItems.value.some(item => item.id === product.id)
-  )
-})
+  return availableProducts.value.filter(
+    (product) => !comparisonItems.value.some((item) => item.id === product.id)
+  );
+});
 
 // Methods
 const openProductSelector = (slot: number) => {
-  selectedSlot.value = slot - 1
-  showProductSelector.value = true
-}
+  selectedSlot.value = slot - 1;
+  showProductSelector.value = true;
+};
 
 const addToComparison = (product: Product) => {
   if (selectedSlot.value < comparisonItems.value.length) {
-    comparisonItems.value[selectedSlot.value] = product
+    comparisonItems.value[selectedSlot.value] = product;
   } else {
-    comparisonItems.value.push(product)
+    comparisonItems.value.push(product);
   }
-  showProductSelector.value = false
-}
+  showProductSelector.value = false;
+};
 
 const removeProduct = (index: number) => {
-  comparisonItems.value.splice(index, 1)
-}
+  comparisonItems.value.splice(index, 1);
+};
 
 const clearAll = () => {
-  comparisonItems.value = []
-}
-
-
+  comparisonItems.value = [];
+};
 </script>
 
 <style scoped>
@@ -390,8 +444,9 @@ const clearAll = () => {
   table {
     font-size: 0.875rem;
   }
-  
-  th, td {
+
+  th,
+  td {
     padding: 0.75rem 0.25rem;
   }
 }

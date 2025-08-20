@@ -1,16 +1,22 @@
-### components/product/ProductImageGallery.vue
-```vue
+### components/product/ProductImageGallery.vue ```vue
 <template>
   <div class="space-y-4">
     <!-- Main Image Display -->
-    <div class="relative aspect-square bg-white rounded-lg shadow-lg overflow-hidden group">
+    <div
+      class="relative aspect-square bg-white rounded-lg shadow-lg overflow-hidden group"
+    >
       <!-- Loading State -->
-      <div v-if="currentImageLoading" class="absolute inset-0 flex items-center justify-center bg-slate-100">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      <div
+        v-if="currentImageLoading"
+        class="absolute inset-0 flex items-center justify-center bg-slate-100"
+      >
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"
+        ></div>
       </div>
 
       <!-- Main Image -->
-      <div 
+      <div
         ref="imageContainer"
         class="relative w-full h-full overflow-hidden cursor-zoom-in"
         @mousemove="handleMouseMove"
@@ -27,7 +33,7 @@
           @load="handleImageLoad"
           @error="handleImageError"
         />
-        
+
         <!-- Zoom Lens -->
         <div
           v-if="showZoomLens && isDesktop"
@@ -36,7 +42,9 @@
         ></div>
 
         <!-- Image Controls -->
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div
+          class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        >
           <!-- Previous/Next Arrows -->
           <button
             v-if="images.length > 1"
@@ -77,7 +85,10 @@
         </div>
 
         <!-- Image Counter -->
-        <div v-if="images.length > 1" class="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
+        <div
+          v-if="images.length > 1"
+          class="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm"
+        >
           {{ currentImageIndex + 1 }} / {{ images.length }}
         </div>
       </div>
@@ -109,34 +120,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
-import ImageThumbnails from '../gallery/ImageThumbnails.vue'
-import ImageViewer from '../gallery/ImageViewer.vue'
-import Image360Viewer from '../gallery/Image360Viewer.vue'
-import { useImageGallery } from '@/composables/useImageGallery'
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/vue/24/outline";
+import ImageThumbnails from "../gallery/ImageThumbnails.vue";
+import ImageViewer from "../gallery/ImageViewer.vue";
+import Image360Viewer from "../gallery/Image360Viewer.vue";
+import { useImageGallery } from "@/composables/useImageGallery";
 
 interface Image {
-  id: string
-  url: string
-  thumbnailUrl: string
-  alt?: string
+  id: string;
+  url: string;
+  thumbnailUrl: string;
+  alt?: string;
 }
 
 interface Props {
-  images: Image[]
-  alt: string
-  has360View?: boolean
-  productId?: string
+  images: Image[];
+  alt: string;
+  has360View?: boolean;
+  productId?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  has360View: false
-})
+  has360View: false,
+});
 
 const emit = defineEmits<{
-  imageError: [url: string]
-}>()
+  imageError: [url: string];
+}>();
 
 // Composable
 const {
@@ -154,49 +169,49 @@ const {
   closeLightbox,
   handleMouseMove,
   handleMouseLeave,
-  handleMouseEnter
-} = useImageGallery(props.images)
+  handleMouseEnter,
+} = useImageGallery(props.images);
 
 // Local state
-const imageContainer = ref<HTMLElement>()
-const currentImageLoading = ref(false)
-const is360Active = ref(false)
+const imageContainer = ref<HTMLElement>();
+const currentImageLoading = ref(false);
+const is360Active = ref(false);
 
 // Computed
-const isDesktop = computed(() => window.innerWidth >= 1024)
+const isDesktop = computed(() => window.innerWidth >= 1024);
 
 // Methods
 const handleImageLoad = () => {
-  currentImageLoading.value = false
-}
+  currentImageLoading.value = false;
+};
 
 const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  emit('imageError', img.src)
-  currentImageLoading.value = false
-}
+  const img = event.target as HTMLImageElement;
+  emit("imageError", img.src);
+  currentImageLoading.value = false;
+};
 
 const toggle360View = () => {
-  is360Active.value = !is360Active.value
-}
+  is360Active.value = !is360Active.value;
+};
 
 // Keyboard navigation
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'ArrowLeft') {
-    previousImage()
-  } else if (event.key === 'ArrowRight') {
-    nextImage()
-  } else if (event.key === 'Escape') {
-    closeLightbox()
+  if (event.key === "ArrowLeft") {
+    previousImage();
+  } else if (event.key === "ArrowRight") {
+    nextImage();
+  } else if (event.key === "Escape") {
+    closeLightbox();
   }
-}
+};
 
 // Lifecycle
 onMounted(() => {
-  document.addEventListener('keydown', handleKeydown)
-})
+  document.addEventListener("keydown", handleKeydown);
+});
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown)
-})
+  document.removeEventListener("keydown", handleKeydown);
+});
 </script>

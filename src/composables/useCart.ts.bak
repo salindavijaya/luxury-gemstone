@@ -1,0 +1,239 @@
+import { computed } from 'vue'
+import { useCartStore } from '@/stores/cart'
+import type { CartItem, Product, CartData } from '@/types/cart'
+
+interface CartStore {
+  // State
+  items: CartItem[]
+  savedForLater: CartItem[]
+  recentlyRemoved: CartItem[]
+  itemCount: number
+  subtotal: number
+  tax: number
+  shipping: number
+  discount: number
+  discountCode: string | null
+  total: number
+  isLoading: boolean
+  error: string | null
+
+  // Operations
+  addItem: (params: { product: Product; quantity: number; options?: Record<string, any> }) => Promise<void>
+  updateQuantity: (itemId: string, quantity: number) => Promise<void>
+  removeItem: (itemId: string) => Promise<void>
+  saveForLater: (itemId: string) => Promise<void>
+  moveToCart: (itemId: string) => Promise<void>
+  moveToSavedForLater: (itemId: string) => Promise<void>
+  clearCart: () => Promise<void>
+  clearAll: () => Promise<void>
+  applyDiscountCode: (code: string) => Promise<boolean>
+  removeDiscountCode: () => Promise<void>
+  restoreRecentItem: (itemId: string) => Promise<void>
+}
+
+/**
+ * Composable for cart management
+ * Provides reactive cart state and operations
+ */
+export function useCart() {
+  // Cart store instance
+  const cartStore = useCartStore() as CartStore
+
+  // Internal helper functions
+  const getItemTotal = (item: CartItem): number => {
+    const basePrice = item.salePrice || item.product.price
+    return basePrice * item.quantity
+  }
+
+  const canAddToCart = (product: Product, quantity: number): boolean => {
+    if (!product.inStock || product.stock <= 0) return false
+
+    const existingItem = cartItems.value.find(item => item.product.id === product.id)
+    const currentQuantity = existingItem ? existingItem.quantity : 0
+    const totalQuantity = currentQuantity + quantity
+    const maxQuantity = product.stockQuantity ?? product.stock
+    
+    return totalQuantity <= maxQuantity
+  }
+
+  // Cart state
+  const cartItems = computed<CartItem[]>(() => cartStore.items)
+  const savedItems = computed<CartItem[]>(() => cartStore.savedForLater)
+  const recentlyRemoved = computed<CartItem[]>(() => cartStore.recentlyRemoved)
+  const itemCount = computed(() => cartStore.itemCount)
+  const discountCode = computed(() => cartStore.discountCode)
+
+  // Cart calculations
+  const subtotal = computed(() => cartStore.subtotal)
+  const tax = computed(() => cartStore.tax)
+  const shipping = computed(() => cartStore.shipping)
+  const discount = computed(() => cartStore.discount)
+  const total = computed(() => cartStore.total)
+
+  // Status
+  const isLoading = computed(() => cartStore.isLoading)
+  const error = computed(() => cartStore.error)
+
+  // Cart summary data
+  const cartData = computed<CartData>(() => ({
+    subtotal: subtotal.value,
+    tax: tax.value,
+    shipping: shipping.value,
+    discount: discount.value,
+    total: total.value
+  }))
+
+  // Cart analytics
+  const cartAnalytics = computed(() => {
+    if (cartItems.value.length === 0) {
+      return { categories: [], topItem: null }
+    }
+
+    let total = 0
+    const categories = new Set<string>()
+
+    for (const item of cartItems.value) {
+      total += getItemTotal(item)
+      categories.add(item.product.category)
+    }
+
+    const topItem = cartItems.value.reduce((a: CartItem, b: CartItem) => 
+      getItemTotal(a) > getItemTotal(b) ? a : b
+    )
+
+    return {
+      total,
+      categories: Array.from(categories),
+      topItem
+    }
+  })
+
+  // Cart operations
+  const addItem = async (product: Product, quantity = 1, options?: Record<string, any>) => {
+    try {
+      if (!canAddToCart(product, quantity)) {
+        throw new Error('Cannot add item to cart')
+      }
+      await cartStore.addItem({ product, quantity, options })
+      return true
+    } catch (error) {
+      console.error('Failed to add item to cart:', error)
+      return false
+    }
+  }
+
+  const removeItem = async (itemId: string) => {
+    try {
+      await cartStore.removeItem(itemId)
+      return true
+    } catch (error) {
+      console.error('Failed to remove item from cart:', error)
+      return false
+    }
+  }
+
+  const updateQuantity = async (itemId: string, quantity: number) => {
+    try {
+      await cartStore.updateQuantity(itemId, quantity)
+      return true
+    } catch (error) {
+      console.error('Failed to update item quantity:', error)
+      return false
+    }
+  }
+
+  const saveForLater = async (itemId: string) => {
+    try {
+      await cartStore.moveToSavedForLater(itemId)
+      return true
+    } catch (error) {
+      console.error('Failed to save item for later:', error)
+      return false
+    }
+  }
+
+  const moveToCart = async (itemId: string) => {
+    try {
+      await cartStore.moveToCart(itemId)
+      return true
+    } catch (error) {
+      console.error('Failed to move item to cart:', error)
+      return false
+    }
+  }
+
+  const clearCart = async () => {
+    try {
+      await cartStore.clearCart()
+      return true
+    } catch (error) {
+      console.error('Failed to clear cart:', error)
+      return false
+    }
+  }
+
+  const applyDiscount = async (code: string) => {
+    try {
+      await cartStore.applyDiscountCode(code)
+      return true
+    } catch (error) {
+      console.error('Failed to apply discount code:', error)
+      return false
+    }
+  }
+
+  const removeDiscount = async () => {
+    try {
+      await cartStore.removeDiscountCode()
+      return true
+    } catch (error) {
+      console.error('Failed to remove discount code:', error)
+      return false
+    }
+  }
+
+  const restoreItem = async (itemId: string) => {
+    try {
+      await cartStore.restoreRecentItem(itemId)
+      return true
+    } catch (error) {
+      console.error('Failed to restore item:', error)
+      return false
+    }
+  }
+
+  return {
+    // State
+    cartItems,
+    savedItems,
+    recentlyRemoved,
+    itemCount,
+    discountCode,
+
+    // Calculations
+    subtotal,
+    tax,
+    shipping,
+    discount,
+    total,
+
+    // Status
+    isLoading,
+    error,
+
+    // Data
+    cartData,
+    cartAnalytics,
+    
+    // Operations
+    addItem,
+    removeItem,
+    updateQuantity,
+    saveForLater,
+    moveToCart,
+    clearCart,
+    applyDiscount,
+    removeDiscount,
+    restoreItem
+  }
+}
