@@ -2,8 +2,17 @@
 <template>
   <div class="space-y-6">
     <!-- Quantity and Size Selection -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <!-- Quantity Selector -->
+    <div class="grid grid-cols-1 gap-4 sm:griimport type { Product } from '@/types/product'
+
+interface Props {
+  product: Product
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<{
+  addToCart: [product: Product, quantity: number]
+  addToWishlist: [product: Product]
+}>()<!-- Quantity Selector -->
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-2">
           Quantity

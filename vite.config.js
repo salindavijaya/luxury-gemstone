@@ -3,12 +3,10 @@ import vue from "@vitejs/plugin-vue";
 import { fileURLToPath, URL } from "node:url";
 import { VitePWA } from "vite-plugin-pwa";
 import { visualizer } from "rollup-plugin-visualizer";
-import { splitVendorChunkPlugin } from "vite";
 
 export default defineConfig({
   plugins: [
     vue(),
-    splitVendorChunkPlugin(),
     VitePWA({
       registerType: "autoUpdate",
       workbox: {
@@ -90,17 +88,27 @@ export default defineConfig({
     minify: "terser",
     sourcemap: false,
     cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "vue-vendor": ["vue", "vue-router", "pinia"],
-          "ui-vendor": ["@headlessui/vue", "@heroicons/vue"],
-          utils: ["lodash-es", "date-fns"],
-          charts: ["chart.js", "vue-chartjs"],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@vue')) {
+              return 'vue-vendor';
+            }
+            if (id.includes('@heroicons') || id.includes('@headlessui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('vee-validate') || id.includes('yup')) {
+              return 'form-vendor';
+            }
+            if (id.includes('@vueuse/core')) {
+              return 'util-vendor';
+            }
+            return 'vendor';
+          }
         },
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split(".");
-          const extType = info[info.length - 1];
           if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
             return `images/[name]-[hash][extname]`;
           }
@@ -110,8 +118,8 @@ export default defineConfig({
           return `assets/[name]-[hash][extname]`;
         },
         chunkFileNames: "js/[name]-[hash].js",
-        entryFileNames: "js/[name]-[hash].js",
-      },
+        entryFileNames: "js/[name]-[hash].js"
+      }
     },
     terserOptions: {
       compress: {
@@ -124,8 +132,7 @@ export default defineConfig({
           "console.warn",
         ],
       },
-    },
-    chunkSizeWarningLimit: 1000,
+    }
   },
   optimizeDeps: {
     include: [
@@ -135,9 +142,12 @@ export default defineConfig({
       "@headlessui/vue",
       "@heroicons/vue/24/outline",
       "@heroicons/vue/24/solid",
+      "@vueuse/core",
+      "vee-validate",
+      "yup",
       "lodash-es",
-      "date-fns",
-    ],
+      "date-fns"
+    ]
   },
   server: {
     port: 3000,
@@ -154,5 +164,5 @@ export default defineConfig({
   preview: {
     port: 4173,
     host: true,
-  },
+  }
 });

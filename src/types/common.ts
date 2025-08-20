@@ -29,6 +29,10 @@ export interface ValidationError {
   message: string;
 }
 
+export interface ErrorMessages {
+  [key: string]: string[];
+}
+
 export interface PaginationParams {
   page: number;
   limit: number;

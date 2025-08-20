@@ -406,16 +406,11 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+import type { CartItem } from "@/types/cart";
+import type { Size } from "@/types/common";
 
 interface CheckoutStep {
-  id: string;
+  id: "shipping" | "payment" | "review";
   title: string;
   description?: string;
 }
@@ -427,6 +422,7 @@ interface Props {
   subtotal?: number;
   shipping?: number;
   tax?: number;
+  layoutSize?: Size;
 }
 
 const props = withDefaults(defineProps<Props>(), {

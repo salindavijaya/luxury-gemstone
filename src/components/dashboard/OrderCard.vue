@@ -1,7 +1,11 @@
 <!-- OrderCard.vue -->
 <template>
-  <div class="bg-white rounded-lg shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+  <div
+    class="bg-white rounded-lg shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow"
+  >
+    <div
+      class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+    >
       <!-- Order Info -->
       <div class="flex-1">
         <div class="flex items-start justify-between mb-4">
@@ -13,10 +17,12 @@
               Placed on {{ formatDate(order.date) }}
             </p>
           </div>
-          <span :class="[
-            'inline-flex px-3 py-1 text-xs font-medium rounded-full',
-            getStatusClasses(order.status)
-          ]">
+          <span
+            :class="[
+              'inline-flex px-3 py-1 text-xs font-medium rounded-full',
+              getStatusClasses(order.status),
+            ]"
+          >
             {{ getStatusText(order.status) }}
           </span>
         </div>
@@ -31,9 +37,9 @@
               :alt="item.name"
               :class="[
                 'w-12 h-12 rounded-lg border-2 border-white object-cover',
-                index > 0 ? 'ml-2' : ''
+                index > 0 ? 'ml-2' : '',
               ]"
-            >
+            />
             <div
               v-if="order.items.length > 3"
               class="w-12 h-12 bg-slate-100 rounded-lg border-2 border-white flex items-center justify-center text-xs font-medium text-slate-600"
@@ -43,7 +49,9 @@
           </div>
           <div>
             <p class="font-medium text-slate-900">
-              {{ order.items.length }} item{{ order.items.length === 1 ? '' : 's' }}
+              {{ order.items.length }} item{{
+                order.items.length === 1 ? "" : "s"
+              }}
             </p>
             <p class="text-2xl font-bold text-emerald-600">
               ${{ order.total.toFixed(2) }}
@@ -90,59 +98,64 @@
 </template>
 
 <script setup lang="ts">
-import { TruckIcon } from 'lucide-vue-next';
-import type { Order } from '@/types';
+import { TruckIcon } from "lucide-vue-next";
+import type { Order } from "@/types/checkout";
+import type { Currency } from "@/types/common";
 
 interface Props {
   order: Order;
+  currency?: Currency;
 }
 
-defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  currency: "USD",
+});
+
 defineEmits<{
-  'view-details': [order: Order];
-  'track-order': [order: Order];
-  'reorder': [order: Order];
+  "view-details": [order: Order];
+  "track-order": [order: Order];
+  reorder: [order: Order];
 }>();
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 };
 
 const getStatusClasses = (status: string) => {
   switch (status) {
-    case 'delivered':
-      return 'bg-emerald-100 text-emerald-800';
-    case 'shipped':
-      return 'bg-blue-100 text-blue-800';
-    case 'confirmed':
-      return 'bg-amber-100 text-amber-800';
-    case 'pending':
-      return 'bg-slate-100 text-slate-800';
-    case 'cancelled':
-      return 'bg-red-100 text-red-800';
+    case "delivered":
+      return "bg-emerald-100 text-emerald-800";
+    case "shipped":
+      return "bg-blue-100 text-blue-800";
+    case "confirmed":
+      return "bg-amber-100 text-amber-800";
+    case "pending":
+      return "bg-slate-100 text-slate-800";
+    case "cancelled":
+      return "bg-red-100 text-red-800";
     default:
-      return 'bg-slate-100 text-slate-800';
+      return "bg-slate-100 text-slate-800";
   }
 };
 
 const getStatusText = (status: string) => {
   switch (status) {
-    case 'delivered':
-      return 'Delivered';
-    case 'shipped':
-      return 'Shipped';
-    case 'confirmed':
-      return 'Confirmed';
-    case 'pending':
-      return 'Pending';
-    case 'cancelled':
-      return 'Cancelled';
+    case "delivered":
+      return "Delivered";
+    case "shipped":
+      return "Shipped";
+    case "confirmed":
+      return "Confirmed";
+    case "pending":
+      return "Pending";
+    case "cancelled":
+      return "Cancelled";
     default:
-      return 'Unknown';
+      return "Unknown";
   }
 };
 </script>

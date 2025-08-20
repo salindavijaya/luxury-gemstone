@@ -48,7 +48,7 @@ export interface Product {
   updatedAt: string;
 }
 
-export const useProductDetail = () => {
+export const useProductDetails = () => {
   const product = ref<Product | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
