@@ -204,7 +204,7 @@
             <input
               type="checkbox"
               :checked="filters.onSale"
-              @change="updateFilters({ onSale: $event.target.checked })"
+              @change="(e: Event) => updateFilters({ onSale: (e.target as HTMLInputElement).checked })"
               class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
             />
             <span class="ml-2 text-sm text-slate-700">On Sale</span>
@@ -213,7 +213,7 @@
             <input
               type="checkbox"
               :checked="filters.featured"
-              @change="updateFilters({ featured: $event.target.checked })"
+              @change="(e: Event) => updateFilters({ featured: (e.target as HTMLInputElement).checked })"
               class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
             />
             <span class="ml-2 text-sm text-slate-700">Featured</span>
@@ -222,7 +222,7 @@
             <input
               type="checkbox"
               :checked="filters.isNew"
-              @change="updateFilters({ isNew: $event.target.checked })"
+              @change="(e: Event) => updateFilters({ isNew: (e.target as HTMLInputElement).checked })"
               class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
             />
             <span class="ml-2 text-sm text-slate-700">New Arrivals</span>
@@ -245,8 +245,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useFilters } from '@/composables/useFilters';
-import type { Cut, Color, Clarity, Shape, CertificationAgency, StockStatus } from '@/types/product';
+import { useFilters } from '@/features/products/composables';
+import type { Cut, Color, Clarity, Shape, CertificationAgency, StockStatus } from '@/features/products/store';
 import FilterPrice from './FilterPrice.vue';
 import FilterCategory from './FilterCategory.vue';
 import FilterGemstoneType from './FilterGemstoneType.vue';
@@ -319,7 +319,7 @@ const activeFilterChips = computed(() => {
   }
 
   // Category chips
-  filters.value.categories.forEach(category => {
+  filters.value.categories.forEach((category: string) => {
     chips.push({
       id: `category-${category}`,
       label: category,
@@ -329,7 +329,7 @@ const activeFilterChips = computed(() => {
   });
 
   // Gemstone type chips
-  filters.value.gemstoneTypes.forEach(type => {
+  filters.value.gemstoneTypes.forEach((type: string) => {
     chips.push({
       id: `gemstone-${type}`,
       label: type.charAt(0).toUpperCase() + type.slice(1),
@@ -387,7 +387,7 @@ const removeFilter = (type: string, value: any) => {
         <!-- Image -->
         <div class="relative w-full md:w-48 h-48 md:h-auto">
           <img
-            :src="product.images[0]"
+            :src="product.images?.[0]?.url || ''"
             :alt="product.name"
             class="w-full h-full object-cover"
             loading="lazy"

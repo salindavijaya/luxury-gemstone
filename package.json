@@ -13,17 +13,18 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "pinia": "^2.1.7",
-    "@vueuse/core": "^10.9.0",
     "@headlessui/vue": "^1.7.19",
     "@heroicons/vue": "^2.1.3",
+    "@vueuse/core": "^10.9.0",
     "axios": "^1.6.8",
-    "vee-validate": "^4.12.6",
-    "yup": "^1.4.0",
+    "date-fns": "^4.1.0",
+    "pinia": "^2.1.7",
     "swiper": "^11.1.0",
-    "vue3-toastify": "^0.2.1"
+    "vee-validate": "^4.12.6",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0",
+    "vue3-toastify": "^0.2.1",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.12.5",

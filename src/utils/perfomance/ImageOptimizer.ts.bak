@@ -1,0 +1,523 @@
+/**
+ * Advanced Image Optimizer for luxury e-commerce platform
+ * Provides image compression, format detection, and optimization utilities
+ */
+
+import type { User } from "@/types";
+
+export interface ImageOptimizationOptions {
+  quality?: number;
+  maxWidth?: number;
+  maxHeight?: number;
+  format?: "webp" | "jpeg" | "png" | "auto";
+  progressive?: boolean;
+  preserveMetadata?: boolean;
+  targetSizeKB?: number;
+  enableSharpening?: boolean;
+  enableNoiseReduction?: boolean;
+}
+
+export interface ImageAnalysis {
+  width: number;
+  height: number;
+  aspectRatio: number;
+  format: string;
+  sizeKB: number;
+  colorDepth: number;
+  hasTransparency: boolean;
+  dominantColors: string[];
+  quality: "low" | "medium" | "high" | "excellent";
+  recommendations: OptimizationRecommendation[];
+}
+
+export interface OptimizationRecommendation {
+  type: "format" | "compression" | "resize" | "quality";
+  suggestion: string;
+  potentialSavings: number;
+  priority: "low" | "medium" | "high";
+}
+
+export interface OptimizationResult {
+  originalSize: number;
+  optimizedSize: number;
+  compressionRatio: number;
+  blob: Blob;
+  url: string;
+  format: string;
+  quality: number;
+}
+
+interface WorkerResult {
+  data: Uint8ClampedArray;
+  width: number;
+  height: number;
+  colorSpace?: PredefinedColorSpace;
+}
+
+interface WorkerMessage {
+  success: boolean;
+  result: WorkerResult;
+  error?: string;
+}
+
+export class ImageOptimizer {
+  private canvas: HTMLCanvasElement | null = null;
+  private ctx: CanvasRenderingContext2D | null = null;
+  private worker: Worker | null = null;
+  private isInitialized = false;
+
+  constructor() {
+    if (typeof window !== "undefined") {
+      this.initialize();
+    }
+  }
+
+  private initialize(): void {
+    if (this.isInitialized) return;
+
+    try {
+      // Create canvas and context
+      this.canvas = document.createElement("canvas");
+      const ctx = this.canvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("Failed to get 2D context");
+      }
+      this.ctx = ctx;
+
+      // Initialize worker
+      if (typeof Worker !== "undefined") {
+        const workerBlob = new Blob([this.getWorkerScript()], {
+          type: "application/javascript",
+        });
+        this.worker = new Worker(URL.createObjectURL(workerBlob));
+        
+        // Set up worker event listener
+        this.worker.addEventListener("error", (event) => {
+          console.error("Worker error:", event);
+        });
+      } else {
+        console.warn("Web Workers not supported. Using fallback methods.");
+      }
+
+      this.isInitialized = true;
+    } catch (error) {
+      console.error("Failed to initialize ImageOptimizer:", error);
+      this.cleanup();
+    }
+  }
+
+  /**
+   * Clean up resources when initialization fails
+   */
+  private cleanup(): void {
+    if (this.worker) {
+      this.worker.terminate();
+      this.worker = null;
+    }
+    this.canvas = null;
+    this.ctx = null;
+    this.isInitialized = false;
+  }
+    }
+  }
+
+  /**
+   * Web worker script for image processing
+   */
+  private getWorkerScript(): string {
+    return `
+      self.onmessage = function(e) {
+        const { imageData, operation, options } = e.data;
+        
+        try {
+          let result;
+          switch (operation) {
+            case 'analyze':
+              result = analyzeImageData(imageData);
+              break;
+            case 'sharpen':
+              result = sharpenImage(imageData, options.strength || 0.5);
+              break;
+            case 'denoise':
+              result = denoiseImage(imageData, options.strength || 0.3);
+              break;
+            default:
+              throw new Error('Unknown operation: ' + operation);
+          }
+          
+          self.postMessage({ success: true, result });
+        } catch (error) {
+          self.postMessage({ success: false, error: error.message });
+        }
+      }
+    `;
+  }
+
+  /**
+   * Check browser support for various image formats
+   */
+  public static checkFormatSupport(): Promise<{
+    webp: boolean;
+    avif: boolean;
+    heic: boolean;
+    jpeg2000: boolean;
+  }> {
+    return Promise.all([
+      this.canDisplayFormat("webp"),
+      this.canDisplayFormat("avif"),
+      this.canDisplayFormat("heic"),
+      this.canDisplayFormat("jpeg2000"),
+    ]).then(([webp, avif, heic, jpeg2000]) => ({
+      webp,
+      avif,
+      heic,
+      jpeg2000,
+    }));
+  }
+
+  private static canDisplayFormat(
+    format: "webp" | "avif" | "heic" | "jpeg2000"
+  ): Promise<boolean> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+
+      const testImages = {
+        webp: "data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA",
+        avif: "data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=",
+        heic: "data:image/heic;base64,AAAAGGZ0eXBoZWljAAAAAG1pZjFoZWljbWlmMQAAAOptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABwaWN0AAAAAAAAAAAAAAAAAAAAAA==",
+        jpeg2000:
+          "data:image/jp2;base64,/0//UQAyAAAAAAABAAAAAgAAAAAAAAAAAAAABAAAAAQAAAAAAAAAAAAEBwEBBwEBBwEBBwEB/1IADQAAAQAAAA4RBwEB/1IAH0AAAQBrbGJjZGVmZ2hpams=",
+      };
+
+      img.src = testImages[format];
+    });
+  }
+
+  /**
+   * Load and analyze an image file
+   */
+  public async analyzeImage(file: File | string): Promise<ImageAnalysis> {
+    if (!this.isInitialized) {
+      this.initialize();
+    }
+
+    const img = await this.loadImage(file);
+    const imageData = this.getImageData(img);
+
+    const analysis = await this.performAnalysis(imageData, img);
+    const recommendations = this.generateRecommendations(analysis);
+
+    return {
+      ...analysis,
+      recommendations,
+    };
+  }
+
+  private async performAnalysis(
+    imageData: ImageData,
+    img: HTMLImageElement
+  ): Promise<Omit<ImageAnalysis, "recommendations">> {
+    const { width, height } = imageData;
+    const sizeKB = this.estimateSize(imageData);
+
+    let workerResult: any = null;
+    if (this.worker) {
+      try {
+        workerResult = await this.runWorkerTask("analyze", imageData);
+      } catch (error) {
+        console.warn("Worker analysis failed, using fallback:", error);
+      }
+    }
+
+    const dominantColors = this.extractDominantColors(
+      imageData,
+      workerResult?.averageColor
+    );
+    const quality = this.assessQuality(imageData, workerResult);
+
+    return {
+      width,
+      height,
+      aspectRatio: width / height,
+      format: this.detectFormat(img.src),
+      sizeKB,
+      colorDepth: this.estimateColorDepth(imageData),
+      hasTransparency: this.hasTransparency(imageData),
+      dominantColors,
+      quality,
+    };
+  }
+
+  private async resizeAndProcessImage(
+    img: HTMLImageElement,
+    options: ImageOptimizationOptions
+  ): Promise<Blob> {
+    if (!this.isInitialized) {
+      this.initialize();
+    }
+
+    if (!this.canvas || !this.ctx) {
+      throw new Error("Canvas context not initialized");
+    }
+
+    const canvas = this.canvas;
+    const ctx = this.ctx;
+
+    const newWidth = options.maxWidth || img.width;
+    const newHeight =
+      options.maxHeight || Math.round(img.height * (newWidth / img.width));
+
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    // Draw resized image
+    ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+    let imageData = ctx.getImageData(0, 0, newWidth, newHeight);
+
+    // Apply image processing if enabled
+    if (options.enableSharpening && this.worker) {
+      try {
+        const result = await this.runWorkerTask("sharpen", imageData, {
+          strength: 0.5,
+        });
+        // Create a copy of the data array to ensure we have a proper ArrayBuffer
+        const data = new Uint8ClampedArray(result.data);
+        imageData = new ImageData(data, result.width, result.height, {
+          colorSpace: result.colorSpace || "srgb",
+        });
+        ctx.putImageData(imageData, 0, 0);
+      } catch (error) {
+        console.error("Sharpening failed:", error);
+      }
+    }
+
+    if (options.enableNoiseReduction && this.worker) {
+      try {
+        const result = await this.runWorkerTask("denoise", imageData, {
+          strength: 0.3,
+        });
+        // Create a copy of the data array to ensure we have a proper ArrayBuffer
+        const data = new Uint8ClampedArray(result.data);
+        imageData = new ImageData(data, result.width, result.height, {
+          colorSpace: result.colorSpace || "srgb",
+        });
+        ctx.putImageData(imageData, 0, 0);
+      } catch (error) {
+        console.error("Noise reduction failed:", error);
+      }
+    }
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Failed to create blob"));
+          }
+        },
+        `image/${options.format || "jpeg"}`,
+        options.quality || 0.8
+      );
+    });
+  }
+
+  private async runWorkerTask(
+    operation: string,
+    imageData: ImageData,
+    options: Record<string, unknown> = {}
+  ): Promise<WorkerResult> {
+    if (!this.worker) {
+      throw new Error("Worker not available");
+    }
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Worker timeout"));
+        this.worker?.removeEventListener("message", handler);
+      }, 10000);
+
+      const handler = (e: MessageEvent<WorkerMessage>) => {
+        clearTimeout(timeout);
+        this.worker?.removeEventListener("message", handler);
+
+        if (e.data.success) {
+          resolve(e.data.result);
+        } else {
+          reject(new Error(e.data.error || "Unknown worker error"));
+        }
+      };
+
+      this.worker.addEventListener("message", handler);
+      this.worker.postMessage({ imageData, operation, options });
+    });
+  }
+
+  private async loadImage(source: File | string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+
+      if (source instanceof File) {
+        img.src = URL.createObjectURL(source);
+      } else {
+        img.src = source;
+      }
+    });
+  }
+
+  private getImageData(img: HTMLImageElement): ImageData {
+    if (!this.canvas || !this.ctx) {
+      throw new Error("Canvas context not initialized");
+    }
+
+    this.canvas.width = img.width;
+    this.canvas.height = img.height;
+    this.ctx.drawImage(img, 0, 0);
+    return this.ctx.getImageData(0, 0, img.width, img.height);
+  }
+
+  private async canvasToBlob(format: string, quality: number): Promise<Blob> {
+    if (!this.canvas) {
+      throw new Error("Canvas not initialized");
+    }
+
+    return new Promise((resolve, reject) => {
+      this.canvas!.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Failed to create blob"));
+        },
+        format,
+        quality
+      );
+    });
+  }
+
+  private generateRecommendations(
+    analysis: Omit<ImageAnalysis, "recommendations">
+  ): OptimizationRecommendation[] {
+    const recommendations: OptimizationRecommendation[] = [];
+
+    // Check size and suggest format change if too large
+    if (analysis.sizeKB > 200) {
+      recommendations.push({
+        type: "format",
+        suggestion: "Consider using WebP format for better compression",
+        potentialSavings: Math.round(analysis.sizeKB * 0.4),
+        priority: "high",
+      });
+    }
+
+    // Check dimensions and suggest resizing if too large
+    const MAX_WIDTH = 2048;
+    const MAX_HEIGHT = 2048;
+    if (analysis.width > MAX_WIDTH || analysis.height > MAX_HEIGHT) {
+      recommendations.push({
+        type: "resize",
+        suggestion: `Consider resizing to ${MAX_WIDTH}x${MAX_HEIGHT} or smaller`,
+        potentialSavings: Math.round(analysis.sizeKB * 0.3),
+        priority: "medium",
+      });
+    }
+
+    return recommendations;
+  }
+
+  private estimateSize(imageData: ImageData): number {
+    // Rough estimation based on pixel count and compression ratio
+    const pixelCount = imageData.width * imageData.height;
+    const bytesPerPixel = this.hasTransparency(imageData) ? 4 : 3;
+    const uncompressedSize = pixelCount * bytesPerPixel;
+    // Assume average 85% compression for JPEG
+    return Math.round((uncompressedSize * 0.15) / 1024);
+  }
+
+  private extractDominantColors(
+    imageData: ImageData,
+    averageColor?: { r: number; g: number; b: number }
+  ): string[] {
+    const colors: string[] = [];
+
+    if (averageColor) {
+      colors.push(`rgb(${averageColor.r},${averageColor.g},${averageColor.b})`);
+    } else {
+      // Simple average color as fallback
+      let r = 0,
+        g = 0,
+        b = 0;
+      const data = imageData.data;
+      const pixelCount = data.length / 4;
+
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+      }
+
+      colors.push(
+        `rgb(${Math.round(r / pixelCount)},${Math.round(g / pixelCount)},${Math.round(b / pixelCount)})`
+      );
+    }
+
+    return colors;
+  }
+
+  private assessQuality(
+    imageData: ImageData,
+    workerResult: any
+  ): ImageAnalysis["quality"] {
+    // Basic quality assessment based on resolution and color depth
+    const totalPixels = imageData.width * imageData.height;
+
+    if (totalPixels > 2000000) {
+      // > 2MP
+      return "excellent";
+    } else if (totalPixels > 1000000) {
+      // > 1MP
+      return "high";
+    } else if (totalPixels > 500000) {
+      // > 0.5MP
+      return "medium";
+    } else {
+      return "low";
+    }
+  }
+
+  private detectFormat(src: string): string {
+    if (src.includes("data:image/")) {
+      return src.split("data:image/")[1].split(";")[0];
+    }
+    const extension = src.split(".").pop()?.toLowerCase();
+    return extension || "unknown";
+  }
+
+  private estimateColorDepth(imageData: ImageData): number {
+    // Simple color depth estimation
+    const uniqueColors = new Set();
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      uniqueColors.add(`${data[i]},${data[i + 1]},${data[i + 2]}`);
+    }
+
+    const uniqueColorCount = uniqueColors.size;
+    if (uniqueColorCount > 16777216) return 32; // 32-bit color
+    if (uniqueColorCount > 65536) return 24; // 24-bit color
+    if (uniqueColorCount > 256) return 16; // 16-bit color
+    return 8; // 8-bit color
+  }
+
+  private hasTransparency(imageData: ImageData): boolean {
+    const data = imageData.data;
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] !== 255) return true;
+    }
+    return false;
+  }
+}

@@ -1,16 +1,21 @@
-### components/product/ProductImageGallery.vue
-```vue
 <template>
   <div class="space-y-4">
     <!-- Main Image Display -->
-    <div class="relative aspect-square bg-white rounded-lg shadow-lg overflow-hidden group">
+    <div
+      class="relative aspect-square bg-white rounded-lg shadow-lg overflow-hidden group"
+    >
       <!-- Loading State -->
-      <div v-if="currentImageLoading" class="absolute inset-0 flex items-center justify-center bg-slate-100">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      <div
+        v-if="currentImageLoading"
+        class="absolute inset-0 flex items-center justify-center bg-slate-100"
+      >
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"
+        ></div>
       </div>
 
       <!-- Main Image -->
-      <div 
+      <div
         ref="imageContainer"
         class="relative w-full h-full overflow-hidden cursor-zoom-in"
         @mousemove="handleMouseMove"
@@ -27,7 +32,7 @@
           @load="handleImageLoad"
           @error="handleImageError"
         />
-        
+
         <!-- Zoom Lens -->
         <div
           v-if="showZoomLens && isDesktop"
@@ -36,7 +41,9 @@
         ></div>
 
         <!-- Image Controls -->
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div
+          class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        >
           <!-- Previous/Next Arrows -->
           <button
             v-if="images.length > 1"
@@ -44,7 +51,9 @@
             class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all"
             aria-label="Previous image"
           >
-            <ChevronLeftIcon class="w-6 h-6 text-slate-700" />
+            <span class="w-6 h-6 text-slate-700 inline-block" aria-hidden
+              >◀</span
+            >
           </button>
 
           <button
@@ -53,7 +62,9 @@
             class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all"
             aria-label="Next image"
           >
-            <ChevronRightIcon class="w-6 h-6 text-slate-700" />
+            <span class="w-6 h-6 text-slate-700 inline-block" aria-hidden
+              >▶</span
+            >
           </button>
 
           <!-- Fullscreen Button -->
@@ -62,7 +73,9 @@
             class="absolute top-4 right-4 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all"
             aria-label="View fullscreen"
           >
-            <MagnifyingGlassIcon class="w-5 h-5 text-slate-700" />
+            <span class="w-5 h-5 text-slate-700 inline-block" aria-hidden
+              >🔍</span
+            >
           </button>
 
           <!-- 360 View Button -->
@@ -77,7 +90,10 @@
         </div>
 
         <!-- Image Counter -->
-        <div v-if="images.length > 1" class="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
+        <div
+          v-if="images.length > 1"
+          class="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm"
+        >
           {{ currentImageIndex + 1 }} / {{ images.length }}
         </div>
       </div>
@@ -85,7 +101,7 @@
 
     <!-- Thumbnail Navigation -->
     <ImageThumbnails
-      :images="images"
+      :images="images.slice()"
       :current-index="currentImageIndex"
       @select="selectImage"
     />
@@ -93,7 +109,7 @@
     <!-- Image Lightbox -->
     <ImageViewer
       v-if="lightboxOpen"
-      :images="images"
+      :images="images.slice()"
       :current-index="currentImageIndex"
       @close="closeLightbox"
       @change="selectImage"
@@ -109,34 +125,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
-import ImageThumbnails from '../gallery/ImageThumbnails.vue'
-import ImageViewer from '../gallery/ImageViewer.vue'
-import Image360Viewer from '../gallery/Image360Viewer.vue'
-import { useImageGallery } from '@/composables/useImageGallery'
-
-interface Image {
-  id: string
-  url: string
-  thumbnailUrl: string
-  alt?: string
-}
+import { ref, computed, onMounted, onUnmounted } from "vue";
+// heroicons removed; using inline symbols
+import ImageThumbnails from "../gallery/ImageThumbnails.vue";
+import ImageViewer from "../gallery/ImageViewer.vue";
+import Image360Viewer from "../gallery/Image360Viewer.vue";
+import { useImageGallery } from "@/composables/useImageGallery";
+import type { Image as ImageType, ImageOrString } from "@/types/product";
 
 interface Props {
-  images: Image[]
-  alt: string
-  has360View?: boolean
-  productId?: string
+  images?: readonly ImageOrString[] | readonly ImageType[];
+  alt: string;
+  has360View?: boolean;
+  productId?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  has360View: false
-})
+  has360View: false,
+});
 
 const emit = defineEmits<{
-  imageError: [url: string]
-}>()
+  imageError: [url: string];
+}>();
+
+const imagesProp = props.images || [];
+
+const images = (imagesProp as any[]).map((i) =>
+  typeof i === "string" ? { id: i, url: i, thumbnailUrl: i, alt: "" } : i
+);
 
 // Composable
 const {
@@ -154,49 +170,49 @@ const {
   closeLightbox,
   handleMouseMove,
   handleMouseLeave,
-  handleMouseEnter
-} = useImageGallery(props.images)
+  handleMouseEnter,
+} = useImageGallery(images as any);
 
 // Local state
-const imageContainer = ref<HTMLElement>()
-const currentImageLoading = ref(false)
-const is360Active = ref(false)
+const imageContainer = ref<HTMLElement>();
+const currentImageLoading = ref(false);
+const is360Active = ref(false);
 
 // Computed
-const isDesktop = computed(() => window.innerWidth >= 1024)
+const isDesktop = computed(() => window.innerWidth >= 1024);
 
 // Methods
 const handleImageLoad = () => {
-  currentImageLoading.value = false
-}
+  currentImageLoading.value = false;
+};
 
 const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  emit('imageError', img.src)
-  currentImageLoading.value = false
-}
+  const img = event.target as HTMLImageElement;
+  emit("imageError", img.src);
+  currentImageLoading.value = false;
+};
 
 const toggle360View = () => {
-  is360Active.value = !is360Active.value
-}
+  is360Active.value = !is360Active.value;
+};
 
 // Keyboard navigation
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'ArrowLeft') {
-    previousImage()
-  } else if (event.key === 'ArrowRight') {
-    nextImage()
-  } else if (event.key === 'Escape') {
-    closeLightbox()
+  if (event.key === "ArrowLeft") {
+    previousImage();
+  } else if (event.key === "ArrowRight") {
+    nextImage();
+  } else if (event.key === "Escape") {
+    closeLightbox();
   }
-}
+};
 
 // Lifecycle
 onMounted(() => {
-  document.addEventListener('keydown', handleKeydown)
-})
+  document.addEventListener("keydown", handleKeydown);
+});
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown)
-})
+  document.removeEventListener("keydown", handleKeydown);
+});
 </script>

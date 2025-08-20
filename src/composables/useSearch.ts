@@ -1,23 +1,30 @@
 // composables/useSearch.ts
-import { ref, computed, watch } from 'vue';
-import { useProductsStore } from '@/stores/products';
-import { debounce } from 'lodash-es';
+import { ref, computed, watch } from "vue";
+import { useProductsStore } from "@/features/products/store";
+import { debounce } from "lodash-es";
 
 export const useSearch = () => {
   const store = useProductsStore();
-  const searchQuery = ref('');
+  const searchQuery = ref("");
   const searchSuggestions = ref<string[]>([]);
   const showSuggestions = ref(false);
   const isSearching = ref(false);
 
   const recentSearches = ref<string[]>([]);
-  const popularSearches = ['Diamond', 'Ruby', 'Emerald', 'Sapphire', 'Round Cut', 'Princess Cut'];
+  const popularSearches = [
+    "Diamond",
+    "Ruby",
+    "Emerald",
+    "Sapphire",
+    "Round Cut",
+    "Princess Cut",
+  ];
 
   // Debounced search function
   const debouncedSearch = debounce((query: string) => {
     store.setSearchQuery(query);
     isSearching.value = false;
-    
+
     if (query.trim()) {
       addToRecentSearches(query);
     }
@@ -27,7 +34,7 @@ export const useSearch = () => {
   watch(searchQuery, (newQuery) => {
     isSearching.value = true;
     debouncedSearch(newQuery);
-    
+
     if (newQuery.length > 0) {
       generateSuggestions(newQuery);
       showSuggestions.value = true;
@@ -42,23 +49,29 @@ export const useSearch = () => {
     const lowerQuery = query.toLowerCase();
 
     // Add matching product names
-    allProducts.forEach(product => {
+    allProducts.forEach((product) => {
       if (product.name.toLowerCase().includes(lowerQuery)) {
         suggestions.add(product.name);
       }
-      
+
       // Add matching gemstone types
-      if (product.gemstoneType.toLowerCase().includes(lowerQuery)) {
-        suggestions.add(product.gemstoneType.charAt(0).toUpperCase() + product.gemstoneType.slice(1));
+      if (
+        product.gemstoneType &&
+        product.gemstoneType.toLowerCase().includes(lowerQuery)
+      ) {
+        suggestions.add(
+          product.gemstoneType.charAt(0).toUpperCase() +
+            product.gemstoneType.slice(1)
+        );
       }
-      
+
       // Add matching categories
       if (product.category.toLowerCase().includes(lowerQuery)) {
         suggestions.add(product.category);
       }
-      
+
       // Add matching tags
-      product.tags.forEach(tag => {
+      product.tags?.forEach((tag) => {
         if (tag.toLowerCase().includes(lowerQuery)) {
           suggestions.add(tag.charAt(0).toUpperCase() + tag.slice(1));
         }
@@ -71,7 +84,7 @@ export const useSearch = () => {
   const addToRecentSearches = (query: string) => {
     recentSearches.value = [
       query,
-      ...recentSearches.value.filter(search => search !== query)
+      ...recentSearches.value.filter((search) => search !== query),
     ].slice(0, 5);
   };
 
@@ -81,8 +94,8 @@ export const useSearch = () => {
   };
 
   const clearSearch = () => {
-    searchQuery.value = '';
-    store.setSearchQuery('');
+    searchQuery.value = "";
+    store.setSearchQuery("");
     showSuggestions.value = false;
   };
 

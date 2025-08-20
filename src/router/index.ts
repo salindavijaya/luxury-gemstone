@@ -3,8 +3,8 @@ import {
   createWebHistory,
   type RouteRecordRaw,
 } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import { useUIStore } from "@/stores/ui";
+import { useAuthStore } from "@/features/auth/store";
+import { useUIStore } from "@/features/ui/store";
 
 // Lazy load components for better performance
 const HomePage = () => import("@/views/HomePage.vue");
@@ -206,7 +206,7 @@ router.beforeEach(async (to, from, next) => {
   const uiStore = useUIStore();
 
   // Start loading
-  uiStore.setLoading(true);
+  uiStore.setPageLoading(true);
 
   // Close mobile menu if open
   uiStore.closeMobileMenu();
@@ -223,6 +223,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Check guest requirements (redirect authenticated users away from login/register)
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    uiStore.showInfoToast("Already signed in", "Redirecting to your dashboard");
     next({ name: "dashboard" });
     return;
   }
@@ -246,11 +247,11 @@ router.afterEach((to, from) => {
   const uiStore = useUIStore();
 
   // Stop loading
-  uiStore.setLoading(false);
+  uiStore.setPageLoading(false);
 
   // Track page view (analytics)
-  if (typeof gtag !== "undefined") {
-    gtag("config", "GA_TRACKING_ID", {
+  if (typeof (window as any).gtag !== "undefined") {
+    (window as any).gtag("config", "GA_TRACKING_ID", {
       page_title: to.meta.title,
       page_location: window.location.href,
     });
@@ -261,12 +262,11 @@ router.afterEach((to, from) => {
 router.onError((error) => {
   console.error("Router navigation error:", error);
   const uiStore = useUIStore();
-  uiStore.setLoading(false);
-  uiStore.showNotification({
-    type: "error",
-    title: "Navigation Error",
-    message: "Failed to load page. Please try again.",
-  });
+  uiStore.setPageLoading(false);
+  uiStore.showErrorToast(
+    "Navigation Error",
+    "Failed to load page. Please try again."
+  );
 });
 
 export default router;

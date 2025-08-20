@@ -1,0 +1,25 @@
+Technology Stack:
+- Vue.js 3 with Composition API
+- Vite build tool
+- Tailwind CSS for styling
+- Pinia for state management
+- Vue Router 4
+- TypeScript (optional)
+
+Design System:
+- Color Palette: Primary: emerald-600, Secondary: slate-800, Accent: amber-500
+- Typography: Inter font family
+- Spacing: Tailwind's default spacing scale
+- Border Radius: rounded-lg (8px) for cards, rounded-md (6px) for buttons
+- Shadows: shadow-lg for cards, shadow-md for hover states
+
+Component Naming Convention:
+- PascalCase for components (ProductCard.vue)
+- Prefix with base type: Base*, Layout*, Product*, User*
+- Composables: use* prefix (useAuth, useCart)
+
+Responsive Breakpoints:
+- Mobile: default (0px+)
+- Tablet: md (768px+)
+- Desktop: lg (1024px+)
+- Large Desktop: xl (1280px+)

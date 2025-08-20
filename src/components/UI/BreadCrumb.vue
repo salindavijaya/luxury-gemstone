@@ -1,5 +1,5 @@
 <template>
-  <nav :aria-label="ariaLabel" class="flex" aria-label="Breadcrumb">
+  <nav :aria-label="ariaLabel" class="flex">
     <ol :class="containerClasses" role="list">
       <li 
         v-for="(item, index) in items" 

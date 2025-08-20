@@ -1,0 +1,19 @@
+// Export dashboard components
+export { default as DashboardAddresses } from "./DashboardAddresses.vue";
+export { default as DashboardOrderHistory } from "./DashboardOrderHistory.vue";
+export { default as DashboardOverview } from "./DashboardOverview.vue";
+export { default as DashboardSettings } from "./DashboardSettings.vue";
+export { default as DashboardSidebar } from "./DashboardSidebar.vue";
+export { default as DashboardWishlist } from "./DashboardWishlist.vue";
+export { default as NotificationCenter } from "./NotificationCenter.vue";
+export { default as OrderCard } from "./OrderCard.vue";
+export { default as OrderDetails } from "./OrderDetails.vue";
+export { default as OrderInvoice } from "./OrderInvoice.vue";
+export { default as OrderTrack } from "./OrderTrack.vue";
+export { default as ProductComparition } from "./ProductComparition.vue";
+export { default as RecentlyViewed } from "./RecentlyViewed.vue";
+export { default as SavedSearches } from "./SavedSearches.vue";
+export { default as UserDashboardLayout } from "./UserDashboardLayout.vue";
+export { default as WishlistActions } from "./WishlistActions.vue";
+export { default as WishlistCollections } from "./WishlistCollections.vue";
+export { default as WishlistGrid } from "./WishlistGrid.vue";

@@ -130,12 +130,26 @@ export default {
       },
     },
   },
-  plugins: [
-    require("@tailwindcss/forms"),
-    require("@tailwindcss/typography"),
-    require("@tailwindcss/aspect-ratio"),
+  plugins: (() => {
+    const p = [];
+    // Optional official plugins — load if installed
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      p.push(require("@tailwindcss/forms"));
+    } catch (e) {
+      // plugin not installed; skip
+    }
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      p.push(require("@tailwindcss/typography"));
+    } catch (e) {}
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      p.push(require("@tailwindcss/aspect-ratio"));
+    } catch (e) {}
+
     // Custom glassmorphism utility
-    function ({ addUtilities }) {
+    p.push(function ({ addUtilities }) {
       const newUtilities = {
         ".glass": {
           background: "rgba(255, 255, 255, 0.1)",
@@ -161,6 +175,8 @@ export default {
         },
       };
       addUtilities(newUtilities);
-    },
-  ],
+    });
+
+    return p;
+  })(),
 };
