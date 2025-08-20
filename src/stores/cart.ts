@@ -7,310 +7,387 @@ export interface CartItem {
   price: number
   originalPrice?: number
   image: string
-  gemType: string
-  carat: number
-  cut: string
-  color: string
-  clarity: string
+  category: string
+  weight?: number
+  cut?: string
+  clarity?: string
+  color?: string
+  certification?: string
   quantity: number
-  inStock: boolean
+  insuranceSelected: boolean
+  appraisalRequested: boolean
+  giftMessage?: string
+  specialInstructions?: string
 }
 
-export interface ShippingInfo {
-  method: 'standard' | 'express' | 'overnight'
-  cost: number
-  estimatedDays: string
+export interface ShippingAddress {
+  firstName: string
+  lastName: string
+  company?: string
+  address1: string
+  address2?: string
+  city: string
+  state: string
+  zipCode: string
+  country: string
+  phone: string
+}
+
+export interface PaymentMethod {
+  type: 'credit' | 'paypal' | 'bank'
+  cardNumber?: string
+  expiryMonth?: string
+  expiryYear?: string
+  cvv?: string
+  cardholderName?: string
+}
+
+export interface DiscountCode {
+  code: string
+  type: 'percentage' | 'fixed'
+  value: number
+  description: string
+}
+
+export interface ShippingOption {
+  id: string
+  name: string
+  description: string
+  price: number
+  estimatedDays: number
+  secure: boolean
 }
 
 export const useCartStore = defineStore('cart', () => {
-  // State
+  // Cart State
   const items = ref<CartItem[]>([])
-  const isOpen = ref(false)
-  const shippingMethod = ref<ShippingInfo['method']>('standard')
-  const promoCode = ref('')
-  const promoDiscount = ref(0)
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
-
-  // Getters
-  const itemCount = computed(() => 
-    items.value.reduce((total, item) => total + item.quantity, 0)
-  )
-
-  const subtotal = computed(() => 
-    items.value.reduce((total, item) => total + (item.price * item.quantity), 0)
-  )
-
-  const shippingCost = computed(() => {
-    const shippingRates = {
-      standard: 0, // Free shipping for luxury items
-      express: 25,
-      overnight: 50
+  const recentlyRemoved = ref<CartItem[]>([])
+  const discountCode = ref<DiscountCode | null>(null)
+  const selectedShippingOption = ref<ShippingOption | null>(null)
+  
+  // Checkout State
+  const currentCheckoutStep = ref(1)
+  const shippingAddress = ref<ShippingAddress>({
+    firstName: '',
+    lastName: '',
+    company: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'US',
+    phone: ''
+  })
+  const billingAddress = ref<ShippingAddress>({
+    firstName: '',
+    lastName: '',
+    company: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'US',
+    phone: ''
+  })
+  const useSameAddress = ref(true)
+  const paymentMethod = ref<PaymentMethod>({ type: 'credit' })
+  const orderNotes = ref('')
+  const isGuestCheckout = ref(true)
+  
+  // Available shipping options
+  const shippingOptions = ref<ShippingOption[]>([
+    {
+      id: 'standard',
+      name: 'Standard Shipping',
+      description: 'Regular insured shipping',
+      price: 25,
+      estimatedDays: 7,
+      secure: true
+    },
+    {
+      id: 'express',
+      name: 'Express Shipping',
+      description: 'Priority overnight delivery',
+      price: 75,
+      estimatedDays: 2,
+      secure: true
+    },
+    {
+      id: 'white-glove',
+      name: 'White Glove Delivery',
+      description: 'Hand delivery with signature',
+      price: 150,
+      estimatedDays: 3,
+      secure: true
     }
-    return subtotal.value > 1000 ? 0 : shippingRates[shippingMethod.value]
-  })
+  ])
 
-  const discount = computed(() => {
-    return Math.round(subtotal.value * (promoDiscount.value / 100))
-  })
-
-  const total = computed(() => 
-    Math.max(0, subtotal.value + shippingCost.value - discount.value)
+  // Computed values
+  const itemCount = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0))
+  
+  const subtotal = computed(() => 
+    items.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   )
-
-  const isEmpty = computed(() => items.value.length === 0)
+  
+  const insuranceTotal = computed(() =>
+    items.value.reduce((sum, item) => 
+      sum + (item.insuranceSelected ? item.price * item.quantity * 0.02 : 0), 0
+    )
+  )
+  
+  const appraisalTotal = computed(() =>
+    items.value.reduce((sum, item) => sum + (item.appraisalRequested ? 150 : 0), 0)
+  )
+  
+  const discountAmount = computed(() => {
+    if (!discountCode.value) return 0
+    if (discountCode.value.type === 'percentage') {
+      return subtotal.value * (discountCode.value.value / 100)
+    }
+    return discountCode.value.value
+  })
+  
+  const taxRate = 0.0875 // 8.75% tax rate
+  const taxAmount = computed(() => (subtotal.value - discountAmount.value) * taxRate)
+  
+  const shippingCost = computed(() => selectedShippingOption.value?.price || 0)
+  
+  const total = computed(() => 
+    subtotal.value + insuranceTotal.value + appraisalTotal.value + 
+    taxAmount.value + shippingCost.value - discountAmount.value
+  )
 
   // Actions
-  const addItem = async (product: Omit<CartItem, 'quantity'>) => {
-    try {
-      isLoading.value = true
-      error.value = null
+  const addItem = (product: Omit<CartItem, 'quantity' | 'insuranceSelected' | 'appraisalRequested'>) => {
+    const existingItem = items.value.find(item => item.id === product.id)
+    
+    if (existingItem) {
+      existingItem.quantity += 1
+    } else {
+      items.value.push({
+        ...product,
+        quantity: 1,
+        insuranceSelected: product.price > 1000, // Auto-select insurance for high-value items
+        appraisalRequested: false
+      })
+    }
+    
+    saveToLocalStorage()
+  }
 
-      const existingItem = items.value.find(item => item.id === product.id)
+  const removeItem = (itemId: string) => {
+    const itemIndex = items.value.findIndex(item => item.id === itemId)
+    if (itemIndex > -1) {
+      const removedItem = items.value.splice(itemIndex, 1)[0]
+      recentlyRemoved.value.unshift(removedItem)
       
-      if (existingItem) {
-        if (existingItem.quantity < 5) { // Max quantity limit
-          existingItem.quantity += 1
-        } else {
-          throw new Error('Maximum quantity reached for this item')
-        }
+      // Keep only last 5 recently removed items
+      if (recentlyRemoved.value.length > 5) {
+        recentlyRemoved.value = recentlyRemoved.value.slice(0, 5)
+      }
+      
+      saveToLocalStorage()
+    }
+  }
+
+  const updateQuantity = (itemId: string, quantity: number) => {
+    const item = items.value.find(item => item.id === itemId)
+    if (item) {
+      if (quantity <= 0) {
+        removeItem(itemId)
       } else {
-        items.value.push({ ...product, quantity: 1 })
-      }
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to add item to cart'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const removeItem = async (itemId: string) => {
-    try {
-      isLoading.value = true
-      error.value = null
-
-      const index = items.value.findIndex(item => item.id === itemId)
-      if (index > -1) {
-        items.value.splice(index, 1)
-      }
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 200))
-      
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to remove item'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const updateQuantity = async (itemId: string, quantity: number) => {
-    if (quantity < 1 || quantity > 5) {
-      throw new Error('Quantity must be between 1 and 5')
-    }
-
-    try {
-      isLoading.value = true
-      error.value = null
-
-      const item = items.value.find(item => item.id === itemId)
-      if (item) {
         item.quantity = quantity
+        saveToLocalStorage()
       }
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 200))
-      
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to update quantity'
-      throw err
-    } finally {
-      isLoading.value = false
     }
   }
 
-  const applyPromoCode = async (code: string) => {
-    try {
-      isLoading.value = true
-      error.value = null
-
-      // Simulate API call to validate promo code
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      const validCodes: Record<string, number> = {
-        'LUXURY10': 10,
-        'FIRST15': 15,
-        'PREMIUM20': 20,
-        'VIP25': 25
-      }
-
-      if (validCodes[code.toUpperCase()]) {
-        promoCode.value = code.toUpperCase()
-        promoDiscount.value = validCodes[code.toUpperCase()]
-      } else {
-        throw new Error('Invalid promo code')
-      }
-      
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to apply promo code'
-      promoCode.value = ''
-      promoDiscount.value = 0
-      throw err
-    } finally {
-      isLoading.value = false
+  const restoreItem = (item: CartItem) => {
+    const index = recentlyRemoved.value.findIndex(removed => removed.id === item.id)
+    if (index > -1) {
+      recentlyRemoved.value.splice(index, 1)
+      addItem(item)
     }
   }
 
-  const removePromoCode = () => {
-    promoCode.value = ''
-    promoDiscount.value = 0
-  }
-
-  const updateShipping = (method: ShippingInfo['method']) => {
-    shippingMethod.value = method
-  }
-
-  const clearCart = async () => {
-    try {
-      isLoading.value = true
-      error.value = null
-
-      items.value = []
-      promoCode.value = ''
-      promoDiscount.value = 0
-      shippingMethod.value = 'standard'
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to clear cart'
-      throw err
-    } finally {
-      isLoading.value = false
+  const toggleInsurance = (itemId: string) => {
+    const item = items.value.find(item => item.id === itemId)
+    if (item) {
+      item.insuranceSelected = !item.insuranceSelected
+      saveToLocalStorage()
     }
   }
 
-  const toggleCart = () => {
-    isOpen.value = !isOpen.value
-  }
-
-  const openCart = () => {
-    isOpen.value = true
-  }
-
-  const closeCart = () => {
-    isOpen.value = false
-  }
-
-  // Utility functions
-  const getShippingOptions = (): ShippingInfo[] => [
-    {
-      method: 'standard',
-      cost: subtotal.value > 1000 ? 0 : 0,
-      estimatedDays: '5-7 business days'
-    },
-    {
-      method: 'express',
-      cost: subtotal.value > 1000 ? 0 : 25,
-      estimatedDays: '2-3 business days'
-    },
-    {
-      method: 'overnight',
-      cost: subtotal.value > 1000 ? 0 : 50,
-      estimatedDays: '1 business day'
-    }
-  ]
-
-  const isItemInCart = (productId: string): boolean => {
-    return items.value.some(item => item.id === productId)
-  }
-
-  const getItemQuantity = (productId: string): number => {
-    const item = items.value.find(item => item.id === productId)
-    return item ? item.quantity : 0
-  }
-
-  // Clear error after 5 seconds
-  const clearError = () => {
-    setTimeout(() => {
-      error.value = null
-    }, 5000)
-  }
-
-  // Initialize cart from localStorage on store creation
-  const initializeCart = () => {
-    try {
-      const savedCart = localStorage.getItem('luxury-gems-cart')
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart)
-        items.value = parsedCart.items || []
-        promoCode.value = parsedCart.promoCode || ''
-        promoDiscount.value = parsedCart.promoDiscount || 0
-        shippingMethod.value = parsedCart.shippingMethod || 'standard'
-      }
-    } catch (err) {
-      console.warn('Failed to load cart from localStorage:', err)
+  const toggleAppraisal = (itemId: string) => {
+    const item = items.value.find(item => item.id === itemId)
+    if (item) {
+      item.appraisalRequested = !item.appraisalRequested
+      saveToLocalStorage()
     }
   }
 
-  // Save cart to localStorage whenever it changes
-  const saveCart = () => {
+  const applyDiscountCode = async (code: string): Promise<boolean> => {
+    // Mock discount codes
+    const validCodes: Record<string, DiscountCode> = {
+      'LUXURY10': { code: 'LUXURY10', type: 'percentage', value: 10, description: '10% off your order' },
+      'FIRST100': { code: 'FIRST100', type: 'fixed', value: 100, description: '$100 off first order' },
+      'GEMSTONE15': { code: 'GEMSTONE15', type: 'percentage', value: 15, description: '15% off gemstones' }
+    }
+    
+    const discount = validCodes[code.toUpperCase()]
+    if (discount) {
+      discountCode.value = discount
+      saveToLocalStorage()
+      return true
+    }
+    return false
+  }
+
+  const removeDiscountCode = () => {
+    discountCode.value = null
+    saveToLocalStorage()
+  }
+
+  const selectShippingOption = (option: ShippingOption) => {
+    selectedShippingOption.value = option
+    saveToLocalStorage()
+  }
+
+  const clearCart = () => {
+    items.value = []
+    recentlyRemoved.value = []
+    discountCode.value = null
+    selectedShippingOption.value = null
+    saveToLocalStorage()
+  }
+
+  const nextCheckoutStep = () => {
+    if (currentCheckoutStep.value < 3) {
+      currentCheckoutStep.value++
+    }
+  }
+
+  const prevCheckoutStep = () => {
+    if (currentCheckoutStep.value > 1) {
+      currentCheckoutStep.value--
+    }
+  }
+
+  const setCheckoutStep = (step: number) => {
+    currentCheckoutStep.value = step
+  }
+
+  const updateShippingAddress = (address: ShippingAddress) => {
+    shippingAddress.value = { ...address }
+    if (useSameAddress.value) {
+      billingAddress.value = { ...address }
+    }
+    saveToLocalStorage()
+  }
+
+  const updateBillingAddress = (address: ShippingAddress) => {
+    billingAddress.value = { ...address }
+    saveToLocalStorage()
+  }
+
+  const toggleSameAddress = () => {
+    useSameAddress.value = !useSameAddress.value
+    if (useSameAddress.value) {
+      billingAddress.value = { ...shippingAddress.value }
+    }
+    saveToLocalStorage()
+  }
+
+  const updatePaymentMethod = (method: PaymentMethod) => {
+    paymentMethod.value = { ...method }
+    saveToLocalStorage()
+  }
+
+  const saveToLocalStorage = () => {
     try {
       const cartData = {
         items: items.value,
-        promoCode: promoCode.value,
-        promoDiscount: promoDiscount.value,
-        shippingMethod: shippingMethod.value
+        discountCode: discountCode.value,
+        selectedShippingOption: selectedShippingOption.value,
+        shippingAddress: shippingAddress.value,
+        billingAddress: billingAddress.value,
+        useSameAddress: useSameAddress.value,
+        orderNotes: orderNotes.value,
+        isGuestCheckout: isGuestCheckout.value
       }
-      localStorage.setItem('luxury-gems-cart', JSON.stringify(cartData))
-    } catch (err) {
-      console.warn('Failed to save cart to localStorage:', err)
+      localStorage.setItem('luxury-cart', JSON.stringify(cartData))
+    } catch (error) {
+      console.error('Failed to save cart to localStorage:', error)
     }
   }
+
+  const loadFromLocalStorage = () => {
+    try {
+      const savedData = localStorage.getItem('luxury-cart')
+      if (savedData) {
+        const cartData = JSON.parse(savedData)
+        items.value = cartData.items || []
+        discountCode.value = cartData.discountCode || null
+        selectedShippingOption.value = cartData.selectedShippingOption || null
+        shippingAddress.value = cartData.shippingAddress || shippingAddress.value
+        billingAddress.value = cartData.billingAddress || billingAddress.value
+        useSameAddress.value = cartData.useSameAddress ?? true
+        orderNotes.value = cartData.orderNotes || ''
+        isGuestCheckout.value = cartData.isGuestCheckout ?? true
+      }
+    } catch (error) {
+      console.error('Failed to load cart from localStorage:', error)
+    }
+  }
+
+  // Initialize from localStorage
+  loadFromLocalStorage()
 
   return {
     // State
     items,
-    isOpen,
-    shippingMethod,
-    promoCode,
-    promoDiscount,
-    isLoading,
-    error,
+    recentlyRemoved,
+    discountCode,
+    selectedShippingOption,
+    shippingOptions,
+    currentCheckoutStep,
+    shippingAddress,
+    billingAddress,
+    useSameAddress,
+    paymentMethod,
+    orderNotes,
+    isGuestCheckout,
     
-    // Getters
+    // Computed
     itemCount,
     subtotal,
+    insuranceTotal,
+    appraisalTotal,
+    discountAmount,
+    taxAmount,
     shippingCost,
-    discount,
     total,
-    isEmpty,
     
     // Actions
     addItem,
     removeItem,
     updateQuantity,
-    applyPromoCode,
-    removePromoCode,
-    updateShipping,
+    restoreItem,
+    toggleInsurance,
+    toggleAppraisal,
+    applyDiscountCode,
+    removeDiscountCode,
+    selectShippingOption,
     clearCart,
-    toggleCart,
-    openCart,
-    closeCart,
-    
-    // Utilities
-    getShippingOptions,
-    isItemInCart,
-    getItemQuantity,
-    clearError,
-    initializeCart,
-    saveCart
+    nextCheckoutStep,
+    prevCheckoutStep,
+    setCheckoutStep,
+    updateShippingAddress,
+    updateBillingAddress,
+    toggleSameAddress,
+    updatePaymentMethod,
+    loadFromLocalStorage
   }
 })
