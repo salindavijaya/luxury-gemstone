@@ -127,15 +127,23 @@ const featuredProducts = ref([]);
 // Sample images - replace with actual images once available
 const heroImages = ref([
   {
-    url: "/src/assets/images/hero/Exquisite_Diamond_Collection_480x480.webp",
+    url: "/images/carosel/banner_1.jpg",
     alt: "Exquisite Diamond Collection",
   },
   {
-    url: "/src/assets/images/hero/Premium_Sapphire_Collection.webp",
+    url: "/images/carosel/banner_2.jpg",
     alt: "Rare Ruby Collection",
   },
   {
-    url: "/src/assets/images/hero/Rare_Ruby_Collection_1024x1024.webp",
+    url: "/images/carosel/banner_3.jpg",
+    alt: "Premium Sapphire Collection",
+  },
+  {
+    url: "/images/carosel/banner_4.jpg",
+    alt: "Premium Sapphire Collection",
+  },
+  {
+    url: "/images/carosel/banner_5.jpg",
     alt: "Premium Sapphire Collection",
   },
 ]);
