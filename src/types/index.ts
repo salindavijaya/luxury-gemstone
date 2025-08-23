@@ -7,10 +7,10 @@ export * from "./checkout";
 export * from "./user";
 
 // Additional exports for backward compatibility
-export type {
+/* export type {
   CartItem as ICartItem,
   Product as IProduct,
   Order as IOrder,
   User as IUser,
   Address as IAddress,
-} from "./common";
+} from "./common"; */

@@ -1,10 +1,15 @@
 // src/types/product.ts
-import type { BaseEntity, Image, Currency } from "./common";
+import type { BaseEntity, Image, Currency, ViewMode } from "./common";
 import type {
   GemstoneType,
   GemstoneSpecifications,
   Certification,
   StockStatus,
+  Cut,
+  Color,
+  Clarity,
+  Shape,
+  CertificationAgency,
 } from "./gemstone";
 
 export interface Product extends BaseEntity {
@@ -68,4 +73,20 @@ export interface ProductSortOption {
   label: string;
   value: string;
   order: "asc" | "desc";
+}
+
+export interface ProductsState {
+  products: Product[];
+  filteredProducts: Product[];
+  filters: ProductFilters;
+  sortBy: ProductSortOption;
+  viewMode: ViewMode;
+  currentPage: number;
+  itemsPerPage: number;
+  totalPages: number;
+  loading: boolean;
+  error: string | null;
+  searchQuery: string;
+  recentlyViewed: string[];
+  savedSearches: ProductFilters[];
 }

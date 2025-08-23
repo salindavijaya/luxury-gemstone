@@ -44,42 +44,50 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import ProductCard from '@/components/product/ProductCard.vue'
-import ProductFilter from '@/components/product/ProductFilter.vue'
-import ActiveFilters from '@/components/product/ActiveFilters.vue'
-import { useProducts } from '@/composables/useProducts'
-import { useFilters } from '@/composables/useFilters'
+import { ref, onMounted } from "vue";
+import ProductCard from "@/components/product/ProductCard.vue";
+import ProductFilter from "@/components/product/ProductFilter.vue";
+import ActiveFilters from "@/components/product/ActiveFilters.vue";
+import { useProducts } from "@/composables/useProducts";
+import type { Product } from "@/types";
 
-const { getProducts } = useProducts()
-const { filters, updateFilters } = useFilters()
+const { filteredProducts, fetchProducts } = useProducts();
 
-const products = ref([])
-const sortOption = ref('price-asc')
-const activeFilters = ref({})
+const products = ref<Product[]>(filteredProducts.value);
+const sortOption = ref<string>("price-asc");
+const activeFilters = ref([]);
 
-const handleFilterChange = async (newFilters) => {
-  activeFilters.value = newFilters
-  await loadProducts()
-}
+const handleFilterChange = async (newFilters: any) => {
+  activeFilters.value = newFilters;
+  await loadProducts();
+};
 
-const removeFilter = async (filterKey) => {
-  delete activeFilters.value[filterKey]
-  await loadProducts()
-}
+const removeFilter = async (filterKey: number) => {
+  delete activeFilters.value[filterKey];
+  await loadProducts();
+};
 
 const handleSort = async () => {
-  await loadProducts()
-}
+  await loadProducts();
+};
 
 const loadProducts = async () => {
-  products.value = await getProducts({
+  /* products.value = await getProducts({
     ...activeFilters.value,
     sort: sortOption.value
-  })
-}
+  }) */
+  products.value = filteredProducts.value;
+};
 
 onMounted(async () => {
-  await loadProducts()
-})
+  console.log("Mounted ProductsPage.vue", products.value);
+  if (products.value.length === 0) {
+    await fetchProducts();
+    await loadProducts();
+    console.log("Loading products in ProductsPage.vue", products.value);
+  } else {
+    console.log("Products already loaded");
+  }
+  //
+});
 </script>

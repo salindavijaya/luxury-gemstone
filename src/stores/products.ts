@@ -3,25 +3,10 @@ import { defineStore } from "pinia";
 import type {
   Product,
   ProductFilters,
-  SortOption,
+  ProductSortOption as SortOption,
   ViewMode,
+  ProductsState,
 } from "@/types/product";
-
-interface ProductsState {
-  products: Product[];
-  filteredProducts: Product[];
-  filters: ProductFilters;
-  sortBy: SortOption;
-  viewMode: ViewMode;
-  currentPage: number;
-  itemsPerPage: number;
-  totalPages: number;
-  loading: boolean;
-  error: string | null;
-  searchQuery: string;
-  recentlyViewed: string[];
-  savedSearches: ProductFilters[];
-}
 
 export const useProductsStore = defineStore("products", {
   state: (): ProductsState => ({
@@ -44,7 +29,7 @@ export const useProductsStore = defineStore("products", {
       featured: false,
       isNew: false,
     },
-    sortBy: "newest",
+    sortBy: { id: "newest", label: "Newest", value: "newest", order: "desc" },
     viewMode: "grid",
     currentPage: 1,
     itemsPerPage: 20,
