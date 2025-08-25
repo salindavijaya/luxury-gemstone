@@ -32,7 +32,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <ProductCard
-              v-for="product in products"
+              v-for="product in filteredProducts"
               :key="product.id"
               :product="product"
             />
@@ -83,7 +83,7 @@ onMounted(async () => {
   console.log("Mounted ProductsPage.vue", products.value);
   if (products.value.length === 0) {
     await fetchProducts();
-    await loadProducts();
+    //await loadProducts();
     console.log("Loading products in ProductsPage.vue", products.value);
   } else {
     console.log("Products already loaded");

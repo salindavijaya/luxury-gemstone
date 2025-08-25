@@ -64,6 +64,7 @@ export interface ProductFilters {
   origins: string[];
   stockStatus: StockStatus[];
   onSale: boolean;
+  inStock: boolean;
   featured: boolean;
   isNew: boolean;
 }

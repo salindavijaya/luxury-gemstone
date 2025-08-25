@@ -6,7 +6,7 @@ import type {
   ProductSortOption as SortOption,
   ViewMode,
   ProductsState,
-} from "@/types/product";
+} from "@/types";
 
 export const useProductsStore = defineStore("products", {
   state: (): ProductsState => ({
@@ -26,6 +26,7 @@ export const useProductsStore = defineStore("products", {
       origins: [],
       stockStatus: [],
       onSale: false,
+      inStock: true,
       featured: false,
       isNew: false,
     },
@@ -145,6 +146,9 @@ export const useProductsStore = defineStore("products", {
       };
       this.currentPage = 1;
       this.applyFiltersAndSort();
+    },
+    removeFilter(key: any) {
+      delete this.filters[key];
     },
 
     setSortBy(sortBy: SortOption) {

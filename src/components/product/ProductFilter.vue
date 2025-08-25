@@ -23,7 +23,7 @@
       >
         {{ filter.label }}
         <button
-          @click="removeFilter(filter.key, filter.value)"
+          @click="removeFilter(filter.key)"
           class="ml-2 hover:text-emerald-900 transition-colors"
           :aria-label="`Remove ${filter.label} filter`"
         >
@@ -65,7 +65,7 @@
           <button
             v-for="shape in shapes"
             :key="shape.value"
-            @click="toggleArrayFilter('shapes', shape.value)"
+            @click="toggleFilter('shapes', shape.value)"
             :class="[
               'flex flex-col items-center p-3 rounded-lg border-2 transition-all duration-200',
               filters.shapes.includes(shape.value)
@@ -176,8 +176,7 @@ import FilterClarity from "./FilterClarity.vue";
 import FilterCarat from "./FilterCarat.vue";
 
 // Composables
-const { filters, clearAllFilters, toggleArrayFilter, removeFilter } =
-  useFilters();
+const { filters, clearAllFilters, removeFilter, toggleFilter } = useFilters();
 const { filteredProducts } = useProducts();
 
 // Filter options data
